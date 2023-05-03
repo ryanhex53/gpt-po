@@ -2,7 +2,7 @@
 
 Translation tool for gettext (po) files that supports custom system prompts and user dictionaries. It also supports translating specified po files to a designated target language and updating po files based on pot files.
 
-Read in other languages: English | [简体中文](./Readme_zh-CN.md)
+Read in other languages: English | [简体中文](./README_zh-CN.md)
 
 ## Installation
 
