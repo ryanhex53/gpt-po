@@ -1,6 +1,6 @@
 {
   "name": "gpt-po",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "command tool for translate po files by gpt",
   "main": "lib/src/index.js",
   "bin": {
@@ -24,9 +24,6 @@
   "bugs": {
     "url": "https://github.com/ryanhex53/gpt-po/issues"
   },
-  "files": [
-    "lib/**/*"
-  ],
   "homepage": "https://github.com/ryanhex53/gpt-po#readme",
   "keywords": [
     "gettext",
