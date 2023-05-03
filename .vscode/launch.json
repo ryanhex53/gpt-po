@@ -10,12 +10,6 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/src/index.ts",
       "args": [
-        "--host",
-        "https://ai.fly2sky.buzz/",
-        "-k",
-        "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",
-        "-l",
-        "zh_CN",
         "--po",
         "C:\\Users\\Ryan\\Desktop\\doc16_locale\\zh_CN\\LC_MESSAGES\\developer.po"
       ],

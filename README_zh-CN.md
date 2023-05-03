@@ -52,6 +52,7 @@ Options:
   --model <model>        openai model (choices: "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
                          default: "gpt-3.5-turbo")
   --po <file>            po file path
+  -src, --source <lang>  source language (default: "english")
   -l, --lang <lang>      target language (default: "simplified chinese")
   -o, --output <file>    output file path, overwirte po file by default
   -h, --help             display help for command
