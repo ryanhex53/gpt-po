@@ -1,5 +1,8 @@
 # PO File Translation Tool for ChatGPT
 
+[![NPM version](https://img.shields.io/npm/v/gpt-po.svg)](https://npmjs.org/package/gpt-po)
+[![Downloads](https://img.shields.io/npm/dm/gpt-po.svg)](https://npmjs.org/package/gpt-po)
+
 Translation tool for gettext (po) files that supports custom system prompts and user dictionaries. It also supports translating specified po files to a designated target language and updating po files based on pot files.
 
 Read in other languages: English | [简体中文](./README_zh-CN.md)

@@ -1,8 +1,11 @@
 # PO文件CHATGPT翻译工具
 
+[![NPM version](https://img.shields.io/npm/v/gpt-po.svg)](https://npmjs.org/package/gpt-po)
+[![Downloads](https://img.shields.io/npm/dm/gpt-po.svg)](https://npmjs.org/package/gpt-po)
+
 gettext(po)文件翻译工具，支持自定义系统提示词和用户字典，支持翻译指定的po文件到指定的目标语言，支持根据pot文件更新po文件。
 
-使用其他语言阅读：[English](./Readme.md) | 简体中文
+使用其他语言阅读：[English](./README.md) | 简体中文
 
 ## 安装
 
