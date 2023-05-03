@@ -16,7 +16,7 @@ npm install openai
 
 ## 常见用法
 
-- `gpt-po sync --po <file> --pot <file>` 根据pot文件更新po文件，先更新po，再进行翻译
+- `gpt-po sync --po <file> --pot <file>` 根据pot文件更新po文件，保留原有翻译
 - `gpt-po --po <file>` 翻译指定的po文件到指定的目标语言，默认目标语言是简体中文
 - `gpt-po userdict` 修改或查看用户字典
 - `gpt-po systemprompt` 修改或查看系统提示词，如果你不确定如何使用，可以不用修改
