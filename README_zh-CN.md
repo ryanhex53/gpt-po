@@ -7,7 +7,7 @@ gettext(po)文件翻译工具，支持自定义系统提示词和用户字典，
 ## 安装
 
 ```
-npm install openai
+npm install gpt-po
 ```
 
 使用此工具前先设置 `OPENAI_API_KEY`，Windows中使用 `set OPENAI_API_KEY=<key>`, Linux中 `export OPENAI_API_KEY=<key>`

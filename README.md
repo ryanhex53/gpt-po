@@ -7,7 +7,7 @@ Read in other languages: English | [简体中文](./README_zh-CN.md)
 ## Installation
 
 ```
-npm install openai
+npm install gpt-po
 ```
 
 Set `OPENAI_API_KEY` before using this tool.
