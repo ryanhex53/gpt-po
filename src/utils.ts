@@ -34,7 +34,7 @@ export function parsePo(poFile: string, defaultCharset?: string): Promise<GetTex
 }
 
 export function compilePo(data: GetTextTranslations, poFile: string): Promise<void> {
-  const buffer = po.compile(data);
+  const buffer = po.compile(data, { foldLength: 120 });
   return new Promise((resolve, reject) => {
     fs.writeFile(poFile, buffer, (err) => {
       if (err) reject(err);
