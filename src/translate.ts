@@ -51,13 +51,12 @@ export function translate(
   return openai.createChatCompletion(
     {
       model,
-      temperature: 0.5,
-      n: 1,
+      temperature: 0.1,
       messages: [
         { role: "system", content: _systemprompt },
         {
           role: "user",
-          content: `Translate incoming ${src} content into ${lang}, only the translated content can be returned, don't ask question.`,
+          content: `Translate the ${src} content I will post later into ${lang}, and keep the untranslated parts such as symbols in the result.`,
         },
         {
           role: "assistant",
@@ -79,6 +78,7 @@ export async function translatePo(
   po: string,
   source: string,
   lang: string,
+  verbose: boolean,
   output: string,
 ) {
   const potrans = await parsePo(po);
@@ -91,9 +91,10 @@ export async function translatePo(
     }
   }
   if (list.length == 0) {
-    console.log("nothing needs translate");
+    console.log("done.");
     return;
   }
+  potrans.headers["Last-Translator"] = `gpt-po v${pkg.version}`;
   let err429 = false;
   let modified = false;
   for (let i = 0; i < list.length; i++) {
@@ -107,7 +108,12 @@ export async function translatePo(
       const res = await translate(trans.msgid, source, lang, model);
       trans.msgstr[0] = res.data.choices[0].message?.content || trans.msgstr[0];
       modified = true;
+      if (verbose) {
+        console.log(trans.msgid);
+        console.log(trans.msgstr[0]);
+      }
       printProgress(i + 1, list.length);
+      await compilePo(potrans, output || po);
     } catch (error: any) {
       if (error.response) {
         if (error.response.status == 429) {
@@ -123,8 +129,23 @@ export async function translatePo(
       }
     }
   }
-  if (modified) {
-    potrans.headers["Last-Translator"] = `gpt-po v${pkg.version}`;
-    await compilePo(potrans, output || po);
+  console.log("done.");
+}
+
+export async function translatePoDir(
+  model: string = "gpt-3.5-turbo",
+  dir: string,
+  source: string,
+  lang: string,
+  verbose: boolean,
+  output: string,
+) {
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    if (file.endsWith(".po")) {
+      const po = join(dir, file);
+      console.log(`translating ${po}`);
+      await translatePo(model, po, source, lang, verbose, output);
+    }
   }
 }

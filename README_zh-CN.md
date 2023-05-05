@@ -21,6 +21,7 @@ npm install gpt-po
 
 - `gpt-po sync --po <file> --pot <file>` 根据pot文件更新po文件，保留原有翻译
 - `gpt-po --po <file>` 翻译指定的po文件到指定的目标语言，默认目标语言是简体中文
+- `gpt-po --dir .` 翻译当前目录下的所有po文件到指定的目标语言，默认目标语言是简体中文
 - `gpt-po userdict` 修改或查看用户字典
 - `gpt-po systemprompt` 修改或查看系统提示词，如果你不确定如何使用，可以不用修改
 
@@ -52,7 +53,9 @@ Options:
   --model <model>        openai model (choices: "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
                          default: "gpt-3.5-turbo")
   --po <file>            po file path
+  --dir <dir>            po files directory
   -src, --source <lang>  source language (default: "english")
+  --verbose              show verbose log
   -l, --lang <lang>      target language (default: "simplified chinese")
   -o, --output <file>    output file path, overwirte po file by default
   -h, --help             display help for command

@@ -21,6 +21,7 @@ Set `OPENAI_API_KEY` before using this tool.
 
 - `gpt-po sync --po <file> --pot <file>` Update the po file based on the pot file, while preserving the original translations.
 - `gpt-po --po <file>` Translate specified po files to a designated target language. By default, the target language is Simplified Chinese.
+- `gpt-po --dir .` Translate all po files in current directory to a designated target language.
 - `gpt-po userdict` Modify or view user dictionaries
 - `gpt-po systemprompt` Modify or view system prompts, if you are not sure how to use it, you can leave it alone
 
@@ -52,7 +53,9 @@ Options:
   --model <model>        openai model (choices: "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
                          default: "gpt-3.5-turbo")
   --po <file>            po file path
+  --dir <dir>            po file directory
   -src, --source <lang>  source language (default: "english")
+  --verbose              show verbose log
   -l, --lang <lang>      target language (default: "simplified chinese")
   -o, --output <file>    output file path, overwirte po file by default
   -h, --help             display help for command
