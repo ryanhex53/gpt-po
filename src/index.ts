@@ -6,7 +6,7 @@ import { join } from "path";
 import * as pkg from "../package.json";
 import { sync } from "./sync";
 import { init, translatePo, translatePoDir } from "./translate";
-import { copyFileIfNotExists, openFileByDefault } from "./utils";
+import { copyFileIfNotExists, findConfig, openFileByDefault } from "./utils";
 
 const program = new Command();
 
@@ -75,9 +75,9 @@ program
     // open `systemprompt.txt` file by system text default editor
     const copyFile = __dirname + "/systemprompt.txt";
     // user home path
-    const promptHome = join(homedir(), "systemprompt.txt");
-    copyFileIfNotExists(promptHome, copyFile);
-    openFileByDefault(promptHome);
+    const promptFile = findConfig("systemprompt.txt");
+    copyFileIfNotExists(promptFile, copyFile);
+    openFileByDefault(promptFile);
   });
 
 // program command `userdict` with help text `open/edit user dictionary`
@@ -88,9 +88,9 @@ program
     // open `dictionary.json` file by system text default editor
     const copyFile = __dirname + "/dictionary.json";
     // user home path
-    const dictHome = join(homedir(), "dictionary.json");
-    copyFileIfNotExists(dictHome, copyFile);
-    openFileByDefault(dictHome);
+    const dictFile = findConfig("dictionary.json");
+    copyFileIfNotExists(dictFile, copyFile);
+    openFileByDefault(dictFile);
   });
 
 program.parse(process.argv);
