@@ -1,9 +1,17 @@
-import * as fs from "fs";
-
 import { spawn } from "child_process";
+import * as fs from "fs";
 import { GetTextTranslations, po } from "gettext-parser";
+import { homedir } from "os";
+import * as path from "path";
 
+/**
+ * copy source file to destination file if destination file does not exist
+ * @param file destination file path
+ * @param copyFile source file path
+ */
 export function copyFileIfNotExists(file: string, copyFile: string): void {
+  // make sure the directory exists
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   // check if file exists else create it
   try {
     fs.accessSync(file, fs.constants.F_OK);
@@ -52,4 +60,41 @@ export function printProgress(progress: number, total: number, extra?: string): 
     .fill("░")
     .join("");
   process.stdout.write(`\r${bar}${dots} ${percent}% ${progress}/${total} ${extra || ""}`);
+}
+
+export function gitRootDir(dir?: string): string|null {
+  // if dir is not provided, use current working directory
+  dir = dir || process.cwd();
+  // check if dir is a git repository
+  if (fs.existsSync(path.join(dir, ".git"))) {
+    return dir;
+  } else {
+    // if dir is root directory, return null
+    if (path.dirname(dir) === dir) {
+      return null;
+    } else {
+      // else, check parent directory
+      return gitRootDir(path.dirname(dir));
+    }
+  }
+}
+
+export function findConfig(fileName: string): string {
+  const currentDir = process.cwd();
+  const gitDir = gitRootDir() || currentDir;
+  const homeDir = homedir();
+
+  const filePaths = [
+    path.join(currentDir, ".gpt-po", fileName),
+    path.join(gitDir, ".gpt-po", fileName),
+    path.join(homeDir, ".config", ".gpt-po", fileName)
+  ];
+  // check if file exists and return the first one
+  for (const filePath of filePaths) {
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+  }
+  // if no file exists, return the default one
+  return path.join(homeDir, ".gpt-po", fileName);
 }

@@ -1,10 +1,9 @@
 import * as fs from "fs";
 import { GetTextTranslation } from "gettext-parser";
 import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from "openai";
-import { homedir } from "os";
 import { join } from "path";
 import * as pkg from "../package.json";
-import { compilePo, copyFileIfNotExists, parsePo, printProgress } from "./utils";
+import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } from "./utils";
 
 let _openai: OpenAIApi;
 let _systemprompt: string;
@@ -22,13 +21,13 @@ export function init(force?: boolean): OpenAIApi {
   }
   // load systemprompt.txt from homedir
   if (!_systemprompt || force) {
-    const systemprompt = join(homedir(), "systemprompt.txt");
+    const systemprompt = findConfig("systemprompt.txt");
     copyFileIfNotExists(systemprompt, join(__dirname, "systemprompt.txt"));
     _systemprompt = fs.readFileSync(systemprompt, "utf-8");
   }
   // load dictionary.json from homedir
   if (!_userdict || force) {
-    const userdict = join(homedir(), "dictionary.json");
+    const userdict = findConfig("dictionary.json");
     copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
     _userdict = JSON.parse(fs.readFileSync(userdict, "utf-8"));
   }
@@ -41,14 +40,13 @@ export function translate(
   lang: string,
   model: string = "gpt-3.5-turbo",
 ) {
-  const openai = init();
   const dicts = Object.entries(_userdict)
     .map(([k, v]) => [
       { role: <ChatCompletionRequestMessageRoleEnum>"user", content: k },
       { role: <ChatCompletionRequestMessageRoleEnum>"assistant", content: v },
     ])
     .flat();
-  return openai.createChatCompletion(
+  return _openai.createChatCompletion(
     {
       model,
       temperature: 0.1,
@@ -83,12 +81,22 @@ export async function translatePo(
 ) {
   const potrans = await parsePo(po);
   const list: Array<GetTextTranslation> = [];
+  const trimRegx = /(?:^ )|(?: $)/;
+  let trimed = false;
   for (const [ctx, entries] of Object.entries(potrans.translations)) {
     for (const [msgid, trans] of Object.entries(entries)) {
+      if (msgid == "") continue;
       if (!trans.msgstr[0]) {
         list.push(trans);
+        continue;
+      } else if (trimRegx.test(trans.msgstr[0])) {
+        trimed = true;
+        trans.msgstr[0] = trans.msgstr[0].trim();
       }
     }
+  }
+  if (trimed) {
+    await compilePo(potrans, po);
   }
   if (list.length == 0) {
     console.log("done.");
@@ -122,7 +130,7 @@ export async function translatePo(
           --i;
         } else {
           console.error(error.response.status);
-          // console.log(error.response.data);
+          console.log(error.response.data);
         }
       } else {
         console.error(error.message);
@@ -138,14 +146,13 @@ export async function translatePoDir(
   source: string,
   lang: string,
   verbose: boolean,
-  output: string,
 ) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     if (file.endsWith(".po")) {
       const po = join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, output);
+      await translatePo(model, po, source, lang, verbose, po);
     }
   }
 }

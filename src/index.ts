@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { join } from "path";
 import * as pkg from "../package.json";
 import { sync } from "./sync";
-import { translatePo, translatePoDir } from "./translate";
+import { init, translatePo, translatePoDir } from "./translate";
 import { copyFileIfNotExists, openFileByDefault } from "./utils";
 
 const program = new Command();
@@ -34,18 +34,24 @@ program
   .option("-src, --source <lang>", "source language", "English")
   .option("-l, --lang <lang>", "target language", "Simplified Chinese")
   .option("--verbose", "print verbose log")
-  .option("-o, --output <file>", "output file path, overwirte po file by default")
-  .action(async ({ key, host, model, po, dir, source, lang, verbose, output }) => {
+  .addOption(
+    new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts(
+      "dir",
+    ),
+  )
+  .action(async (args) => {
+    const { key, host, model, po, dir, source, lang, verbose, output, checkRegx } = args;
     if (host) {
       process.env.OPENAI_API_HOST = host;
     }
     if (key) {
       process.env.OPENAI_API_KEY = key;
     }
+    init();
     if (po) {
       await translatePo(model, po, source, lang, verbose, output);
     } else if (dir) {
-      await translatePoDir(model, dir, source, lang, verbose, output);
+      await translatePoDir(model, dir, source, lang, verbose);
     } else {
       console.error("po file or directory is required");
       process.exit(1);
