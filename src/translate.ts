@@ -51,14 +51,10 @@ export function translate(
       model,
       temperature: 0.1,
       messages: [
-        { role: "system", content: _systemprompt },
-        {
-          role: "user",
-          content: `Translate the ${src} content I will post later into ${lang}, and keep the untranslated parts such as symbols in the result.`,
-        },
-        {
-          role: "assistant",
-          content: "Sure, Please send me the content that needs to be translated.",
+        { 
+          role: "system", 
+          content: 
+          _systemprompt + ` Translate the ${src} user content into ${lang} language. Please translate it as a text, not as a table. The parts that cannot be translated will retain their original format.` 
         },
         // add userdict here
         ...dicts,
@@ -134,6 +130,9 @@ export async function translatePo(
         }
       } else {
         console.error(error.message);
+        if (error.code == "ECONNABORTED") {
+          console.log('you may need to set "HTTPS_PROXY" to reach openai api.')
+        }
       }
     }
   }

@@ -11,7 +11,7 @@
       "program": "${workspaceFolder}/src/index.ts",
       "args": [
         "--po",
-        "C:\\Users\\Ryan\\Desktop\\doc16_locale\\zh_CN\\LC_MESSAGES\\developer.po"
+        "C:\\Users\\Ryan\\Desktop\\test.po"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [

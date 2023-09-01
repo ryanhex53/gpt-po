@@ -8,15 +8,18 @@ import * as path from "path";
  * copy source file to destination file if destination file does not exist
  * @param file destination file path
  * @param copyFile source file path
+ * @param force force copy file
  */
-export function copyFileIfNotExists(file: string, copyFile: string): void {
+export function copyFileIfNotExists(file: string, copyFile: string, force: boolean = false): void {
   // make sure the directory exists
   fs.mkdirSync(path.dirname(file), { recursive: true });
   // check if file exists else create it
   try {
     fs.accessSync(file, fs.constants.F_OK);
-    // check if the file is empty else copy the file
-    fs.statSync(file).size === 0 && fs.copyFileSync(copyFile, file);
+    // check if the file is empty or force, copy the file
+    if (force || fs.statSync(file).size === 0) {
+      fs.copyFileSync(copyFile, file);
+    }
   } catch (err) {
     fs.copyFileSync(copyFile, file);
   }

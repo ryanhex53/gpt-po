@@ -47,6 +47,11 @@ program
     if (key) {
       process.env.OPENAI_API_KEY = key;
     }
+    // process.env.OPENAI_API_KEY is not set, exit
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is required");
+      process.exit(1);
+    }
     init();
     if (po) {
       await translatePo(model, po, source, lang, verbose, output);
@@ -71,12 +76,17 @@ program
 program
   .command("systemprompt")
   .description("open/edit system prompt")
-  .action(() => {
+  .option("--reset", "reset system prompt to default")
+  .action((args) => {
+    const { reset } = args;
     // open `systemprompt.txt` file by system text default editor
     const copyFile = __dirname + "/systemprompt.txt";
     // user home path
     const promptFile = findConfig("systemprompt.txt");
-    copyFileIfNotExists(promptFile, copyFile);
+    copyFileIfNotExists(promptFile, copyFile, reset);
+    if (reset) {
+      console.log("systemprompt.txt reset to default");
+    }
     openFileByDefault(promptFile);
   });
 
