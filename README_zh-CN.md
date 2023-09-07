@@ -21,9 +21,12 @@ npm install gpt-po
 
 - `gpt-po sync --po <file> --pot <file>` 根据pot文件更新po文件，保留原有翻译
 - `gpt-po --po <file>` 翻译指定的po文件到指定的目标语言，默认目标语言是简体中文
+- `gpt-po --po <file> --lang <lang>` Translate specified po files to a designated target language.
 - `gpt-po --dir .` 翻译当前目录下的所有po文件到指定的目标语言，默认目标语言是简体中文
 - `gpt-po userdict` 修改或查看用户字典
+- `gpt-po userdict --explore` 用于浏览字典目录, 如果你想要增加或修改现有的字典。字典可以按`dictionary-<lang>.json`格式命令, 例如, `dictionary-simplified-chinese.json` 是针对简体中文的字典.
 - `gpt-po systemprompt` 修改或查看系统提示词，如果你不确定如何使用，可以不用修改
+- `gpt-po systemprompt --reset` 重置系统提示词
 
 ```
 Usage: gpt-po [command] [options]

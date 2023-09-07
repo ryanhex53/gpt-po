@@ -1,7 +1,7 @@
-import { spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import * as fs from "fs";
 import { GetTextTranslations, po } from "gettext-parser";
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import * as path from "path";
 
 /**
@@ -82,6 +82,14 @@ export function gitRootDir(dir?: string): string|null {
   }
 }
 
+/**
+ * find config file in the following order:
+ * 1. current directory
+ * 2. git root directory
+ * 3. home directory
+ * @param fileName 
+ * @returns full path of the config file
+ */
 export function findConfig(fileName: string): string {
   const currentDir = process.cwd();
   const gitDir = gitRootDir() || currentDir;
@@ -100,4 +108,18 @@ export function findConfig(fileName: string): string {
   }
   // if no file exists, return the default one
   return path.join(homeDir, ".gpt-po", fileName);
+}
+/**
+ * open file explorer by platform
+ * @param location folder or file path
+ */
+export function openFileExplorer(location: string): void {
+  if (platform() === 'win32') {
+    exec(`explorer.exe "${path.dirname(location)}"`);
+  } else if (platform() === 'darwin') {
+    exec(`open "${path.dirname(location)}"`);
+  } else {
+    // Assuming a Linux-based system
+    exec(`xdg-open "${path.dirname(location)}"`);
+  }
 }

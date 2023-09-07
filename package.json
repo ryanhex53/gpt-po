@@ -1,6 +1,6 @@
 {
   "name": "gpt-po",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "command tool for translate po files by gpt",
   "main": "lib/src/index.js",
   "bin": {
@@ -37,7 +37,7 @@
     "@types/jest": "^29.5.1",
     "jest": "^29.5.0",
     "ncp": "^2.0.0",
-    "prettier": "^3.0.0-alpha.7-for-vscode",
+    "prettier": "^3.0.3",
     "rimraf": "^5.0.0",
     "ts-jest": "^29.1.0",
     "tslint": "^6.1.3",

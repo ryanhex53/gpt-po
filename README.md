@@ -21,9 +21,12 @@ Set `OPENAI_API_KEY` before using this tool.
 
 - `gpt-po sync --po <file> --pot <file>` Update the po file based on the pot file, while preserving the original translations.
 - `gpt-po --po <file>` Translate specified po files to a designated target language. By default, the target language is Simplified Chinese.
+- `gpt-po --po <file> --lang <lang>` Translate specified po files to a designated target language.
 - `gpt-po --dir .` Translate all po files in current directory to a designated target language.
 - `gpt-po userdict` Modify or view user dictionaries
+- `gpt-po userdict --explore` Explore user dictionaries, if you want add new dictionaries or modify existing dictionaries. dictionaries can be named as `dictionary-<lang>.json`, for example, `dictionary-simplified-chinese.json` is the dictionary for Simplified Chinese.
 - `gpt-po systemprompt` Modify or view system prompts, if you are not sure how to use it, you can leave it alone
+- `gpt-po systemprompt --reset` Reset system prompts
 
 ```
 Usage: gpt-po [command] [options]

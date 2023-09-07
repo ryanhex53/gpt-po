@@ -1,12 +1,10 @@
 #!/usr/bin/env node
 
 import { Command, Option } from "commander";
-import { homedir } from "os";
-import { join } from "path";
 import * as pkg from "../package.json";
 import { sync } from "./sync";
 import { init, translatePo, translatePoDir } from "./translate";
-import { copyFileIfNotExists, findConfig, openFileByDefault } from "./utils";
+import { copyFileIfNotExists, findConfig, openFileByDefault, openFileExplorer } from "./utils";
 
 const program = new Command();
 
@@ -94,11 +92,17 @@ program
 program
   .command("userdict")
   .description("open/edit user dictionary")
-  .action(() => {
+  .option("--explore", "open user dictionary directory")
+  .action((args) => {
+    const { explore } = args;
     // open `dictionary.json` file by system text default editor
     const copyFile = __dirname + "/dictionary.json";
     // user home path
     const dictFile = findConfig("dictionary.json");
+    if (explore) {
+      // open user dictionary directory
+      return openFileExplorer(dictFile);
+    }
     copyFileIfNotExists(dictFile, copyFile);
     openFileByDefault(dictFile);
   });

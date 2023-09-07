@@ -7,7 +7,7 @@ import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } fr
 
 let _openai: OpenAIApi;
 let _systemprompt: string;
-let _userdict: { [key: string]: string };
+let _userdict: { [lang: string]: { [key: string]: string } };
 
 export function init(force?: boolean): OpenAIApi {
   if (!_openai || force) {
@@ -29,7 +29,7 @@ export function init(force?: boolean): OpenAIApi {
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
     copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
-    _userdict = JSON.parse(fs.readFileSync(userdict, "utf-8"));
+    _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
 }
@@ -40,7 +40,9 @@ export function translate(
   lang: string,
   model: string = "gpt-3.5-turbo",
 ) {
-  const dicts = Object.entries(_userdict)
+  const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
+  const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
+    .filter(([k, _]) => text.toLowerCase().includes(k.toLowerCase()))
     .map(([k, v]) => [
       { role: <ChatCompletionRequestMessageRoleEnum>"user", content: k },
       { role: <ChatCompletionRequestMessageRoleEnum>"assistant", content: v },
@@ -54,7 +56,7 @@ export function translate(
         { 
           role: "system", 
           content: 
-          _systemprompt + ` Translate the ${src} user content into ${lang} language. Please translate it as a text, not as a table. The parts that cannot be translated will retain their original format.` 
+          _systemprompt + ` Translate the ${src} content provided by the user into ${lang}. Please translate it as a text, not as a table. The parts that cannot be translated will retain their original format.` 
         },
         // add userdict here
         ...dicts,
@@ -75,6 +77,15 @@ export async function translatePo(
   verbose: boolean,
   output: string,
 ) {
+  // try to load dictionary by lang-code if it not loaded
+  const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
+  if (!_userdict[lang_code]) {
+    const lang_dic_file = findConfig(`dictionary-${lang_code}.json`);
+    if (fs.existsSync(lang_dic_file)) {
+      _userdict[lang_code] = JSON.parse(fs.readFileSync(lang_dic_file, "utf-8"));
+      console.log(`dictionary-${lang_code}.json is loaded.`);
+    }
+  }
   const potrans = await parsePo(po);
   const list: Array<GetTextTranslation> = [];
   const trimRegx = /(?:^ )|(?: $)/;
