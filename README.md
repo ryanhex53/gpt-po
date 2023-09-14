@@ -29,20 +29,21 @@ Set `OPENAI_API_KEY` before using this tool.
 - `gpt-po systemprompt --reset` Reset system prompts
 
 ```
-Usage: gpt-po [command] [options]
+Usage: gpt-po [options] [command]
 
 command tool for translate po files by gpt
 
 Options:
-  -V, --version        output the version number
-  -h, --help           display help for command
+  -V, --version           output the version number
+  -h, --help              display help for command
 
 Commands:
-  translate [options]  translate po file (default command)
-  sync [options]       update po from pot file
-  systemprompt         open/edit system prompt
-  userdict             open/edit user dictionary
-  help [command]       display help for command
+  translate [options]     translate po file (default command)
+  sync [options]          update po from pot file
+  systemprompt [options]  open/edit system prompt
+  userdict [options]      open/edit user dictionary
+  remove [options]        remove po entries by options
+  help [command]          display help for command
 ```
 
 ```
@@ -62,4 +63,21 @@ Options:
   -l, --lang <lang>      target language (default: "simplified chinese")
   -o, --output <file>    output file path, overwirte po file by default
   -h, --help             display help for command
+```
+
+```
+Usage: gpt-po remove [options]
+
+remove po entries by options
+
+Options:
+  --po <file>                       po file path
+  --fuzzy                           remove fuzzy entries
+  -obs, --obsolete                  remove obsolete entries
+  -ut, --untranslated               remove untranslated entries
+  -t, --translated                  remove translated entries
+  -tnf, --translated-not-fuzzy      remove translated not fuzzy entries
+  -ft, --fuzzy-translated           remove fuzzy translated entries
+  -rc, --reference-contains <text>  remove entries whose reference contains text, text can be a regular expression like /text/ig
+  -h, --help                        display help for command
 ```

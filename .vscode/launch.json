@@ -10,8 +10,10 @@
       "name": "Launch Program",
       "program": "${workspaceFolder}/src/index.ts",
       "args": [
+        "remove",
         "--po",
-        "C:\\Users\\Ryan\\Desktop\\test.po"
+        "C:\\Users\\Ryan\\Desktop\\test.po",
+        "--fuzzy"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [

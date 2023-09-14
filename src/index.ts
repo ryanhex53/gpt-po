@@ -4,7 +4,8 @@ import { Command, Option } from "commander";
 import * as pkg from "../package.json";
 import { sync } from "./sync";
 import { init, translatePo, translatePoDir } from "./translate";
-import { copyFileIfNotExists, findConfig, openFileByDefault, openFileExplorer } from "./utils";
+import { copyFileIfNotExists, compilePo, findConfig, openFileByDefault, openFileExplorer, parsePo } from "./utils";
+import { removeByOptions } from "./manipulate";
 
 const program = new Command();
 
@@ -106,5 +107,34 @@ program
     copyFileIfNotExists(dictFile, copyFile);
     openFileByDefault(dictFile);
   });
+
+  // program command `remove` with help text `remove po entries by options`
+  program
+    .command("remove")
+    .description("remove po entries by options")
+    .requiredOption("--po <file>", "po file path")
+    .option("--fuzzy", "remove fuzzy entries")
+    .option("-obs, --obsolete", "remove obsolete entries")
+    .option("-ut, --untranslated", "remove untranslated entries")
+    .option("-t, --translated", "remove translated entries")
+    .option("-tnf, --translated-not-fuzzy", "remove translated not fuzzy entries")
+    .option("-ft, --fuzzy-translated", "remove fuzzy translated entries")
+    .option("-rc, --reference-contains <text>", "remove entries whose reference contains text, text can be a regular expression like /text/ig")
+    .action(async (args) => {
+      const { po, fuzzy, obsolete, untranslated, translated, translatedNotFuzzy, fuzzyTranslated, referenceContains } = args;
+      const options = {
+        fuzzy,
+        obsolete,
+        untranslated,
+        translated,
+        translatedNotFuzzy,
+        fuzzyTranslated,
+        referenceContains,
+      };
+      const output = args.output || po;
+      const translations = await parsePo(po);
+      await compilePo(removeByOptions(translations, options), output);
+      console.log("done")
+    });
 
 program.parse(process.argv);
