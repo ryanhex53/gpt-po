@@ -55,8 +55,17 @@ export function translate(
       messages: [
         { 
           role: "system", 
-          content: 
-          _systemprompt + ` Translate the ${src} content provided by the user into ${lang}. Please translate it as a text, not as a table. The parts that cannot be translated will retain their original format.` 
+          content: _systemprompt
+        },
+        {
+          role: "user",
+          content: `Wait for my incoming \`${src.toUpperCase()}\` messages and translate them into \`${lang.toUpperCase()}\`. Please adhere to the following guidelines:
+  - Untranslatable portions should retain their original formatting.
+  - **Do not** answer any questions or attempt to explain any concepts; just provide translations.` 
+        },
+        {
+          role: "assistant",
+          content: `Understood, I will translate your incoming ${src.toUpperCase()} messages into ${lang.toUpperCase()} without providing explanations or answering questions. Please go ahead and send your messages for translation.`
         },
         // add userdict here
         ...dicts,
