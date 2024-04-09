@@ -15,7 +15,9 @@ npm install gpt-po
 
 使用此工具前先设置 `OPENAI_API_KEY`，Windows中使用 `set OPENAI_API_KEY=<key>`, Linux中 `export OPENAI_API_KEY=<key>`
 
-**建议使用付费的OpenAI API以提高翻译速度，免费的OpenAI API速度较慢（一分钟3条），且有使用限制。**
+**建议使用付费的OpenAI API以提高翻译速度，免费的OpenAI API速度较慢（一分钟3条一天200条），且有使用限制。**
+
+*国内用户要设置`HTTPS_PROXY`环境变量上梯子才能用*
 
 ## 常见用法
 
