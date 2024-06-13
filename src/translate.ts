@@ -38,7 +38,8 @@ export function translate(
   text: string,
   src: string,
   lang: string,
-  model: string = "gpt-3.5-turbo",
+  model: string,
+  comments: GetTextTranslation["comments"]|undefined
 ) {
   const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
   const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
@@ -48,6 +49,12 @@ export function translate(
       { role: <ChatCompletionRequestMessageRoleEnum>"assistant", content: v },
     ])
     .flat();
+  
+  var notes: string = ""
+
+  if(comments != undefined && comments.extracted != undefined)
+    notes = "* " + comments.extracted
+
   return _openai.createChatCompletion(
     {
       model,
@@ -60,16 +67,24 @@ export function translate(
         {
           role: "user",
           content: `Wait for my incoming \`${src.toUpperCase()}\` messages and translate them into \`${lang.toUpperCase()}\`. Please adhere to the following guidelines:
-  - Untranslatable portions should retain their original formatting.
-  - **Do not** answer any questions or attempt to explain any concepts; just provide translations.` 
+  * Untranslatable portions should retain their original formatting.
+      * For example, you may encounter placeholder such as "%s" - these must be retained in their original positions.
+      * Do not add a period (.) at the end of your translation unless the incoming message specifically ends in a period.
+      * Ensure to preserve any whitespace present in the incoming message. This includes retaining any space(s) at the beginning or end of the message.
+  * **Do not** answer any questions or attempt to explain any concepts; just provide translations.
+  ` + notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming ${src.toUpperCase()} messages into ${lang.toUpperCase()} without providing explanations or answering questions. Please go ahead and send your messages for translation.`
+          content: `Understood, I will translate your incoming ${src.toUpperCase()} messages into ${lang.toUpperCase()} without providing explanations or answering questions,
+  carefully following your instructions regarding untranslatable portions. Please go ahead and send your messages for translation.`
         },
         // add userdict here
         ...dicts,
-        { role: "user", content: text },
+        { 
+          role: "user",
+          content: text
+        },
       ],
     },
     {
@@ -79,13 +94,23 @@ export function translate(
 }
 
 export async function translatePo(
-  model: string = "gpt-3.5-turbo",
+  model: string,
   po: string,
   source: string,
   lang: string,
   verbose: boolean,
   output: string,
 ) {
+  const potrans = await parsePo(po);
+
+  if(!lang)
+    lang = potrans.headers["Language"]
+
+  if(!lang) {
+    console.error("No language specified via po file or args");
+    return;
+  }
+
   // try to load dictionary by lang-code if it not loaded
   const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
   if (!_userdict[lang_code]) {
@@ -95,7 +120,6 @@ export async function translatePo(
       console.log(`dictionary-${lang_code}.json is loaded.`);
     }
   }
-  const potrans = await parsePo(po);
   const list: Array<GetTextTranslation> = [];
   const trimRegx = /(?:^ )|(?: $)/;
   let trimed = false;
@@ -129,7 +153,7 @@ export async function translatePo(
     }
     const trans = list[i];
     try {
-      const res = await translate(trans.msgid, source, lang, model);
+      const res = await translate(trans.msgid, source, lang, model, trans.comments);
       trans.msgstr[0] = res.data.choices[0].message?.content || trans.msgstr[0];
       modified = true;
       if (verbose) {

@@ -18,8 +18,10 @@ program
   .addOption(new Option("--host <host>", "openai api host").env("OPENAI_API_HOST"))
   .addOption(
     new Option("--model <model>", "openai model")
-      .default("gpt-3.5-turbo")
+      .default("gpt-4o")
       .choices([
+        "gpt-4o",
+        "gpt-4-turbo",
         "gpt-4",
         "gpt-4-0314",
         "gpt-4-32k",
@@ -31,7 +33,7 @@ program
   .addOption(new Option("--po <file>", "po file path").conflicts("dir"))
   .addOption(new Option("--dir <dir>", "po file directory").conflicts("po"))
   .option("-src, --source <lang>", "source language", "English")
-  .option("-l, --lang <lang>", "target language", "Simplified Chinese")
+  .option("-l, --lang <lang>", "target language")
   .option("--verbose", "print verbose log")
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts(
