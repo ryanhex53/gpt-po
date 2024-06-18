@@ -19,16 +19,14 @@ export function init(force?: boolean): OpenAIApi {
     }
     _openai = new OpenAIApi(configuration);
   }
-  // load systemprompt.txt from homedir
+  // load systemprompt.txt
   if (!_systemprompt || force) {
     const systemprompt = findConfig("systemprompt.txt");
-    copyFileIfNotExists(systemprompt, join(__dirname, "systemprompt.txt"));
     _systemprompt = fs.readFileSync(systemprompt, "utf-8");
   }
-  // load dictionary.json from homedir
+  // load dictionary.json
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
-    copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
     _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
@@ -53,7 +51,7 @@ export function translate(
   var notes: string = ""
 
   if(comments != undefined && comments.extracted != undefined)
-    notes = "* " + comments.extracted
+    notes = comments.extracted
 
   return _openai.createChatCompletion(
     {
@@ -66,18 +64,11 @@ export function translate(
         },
         {
           role: "user",
-          content: `Wait for my incoming \`${src.toUpperCase()}\` messages and translate them into \`${lang.toUpperCase()}\`. Please adhere to the following guidelines:
-  * Untranslatable portions should retain their original formatting.
-      * For example, you may encounter placeholder such as "%s" - these must be retained in their original positions.
-      * Do not add a period (.) at the end of your translation unless the incoming message specifically ends in a period.
-      * Ensure to preserve any whitespace present in the incoming message. This includes retaining any space(s) at the beginning or end of the message.
-  * **Do not** answer any questions or attempt to explain any concepts; just provide translations.
-  ` + notes
+          content: `Wait for my incoming message in "${src.toLowerCase()}" (an ISO 639-1 code) and translate it into "${lang.toLowerCase()}" (also an ISO 639-1 code), carefully following your system prompt. ` + notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming ${src.toUpperCase()} messages into ${lang.toUpperCase()} without providing explanations or answering questions,
-  carefully following your instructions regarding untranslatable portions. Please go ahead and send your messages for translation.`
+          content: `Understood, I will translate your incoming "${src.toLowerCase()}" message into "${lang.toUpperCase()}", interpreting those as ISO 639-1 codes and carefully following my system prompt. Please go ahead and send your message for translation.`
         },
         // add userdict here
         ...dicts,
@@ -102,7 +93,7 @@ export async function translatePo(
   output: string,
 ) {
   const potrans = await parsePo(po);
-
+  
   if(!lang)
     lang = potrans.headers["Language"]
 

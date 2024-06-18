@@ -32,8 +32,8 @@ program
   )
   .addOption(new Option("--po <file>", "po file path").conflicts("dir"))
   .addOption(new Option("--dir <dir>", "po file directory").conflicts("po"))
-  .option("-src, --source <lang>", "source language", "English")
-  .option("-l, --lang <lang>", "target language")
+  .option("-src, --source <lang>", "source language (ISO 639-1)", "en")
+  .option("-l, --lang <lang>", "target language (ISO 639-1)")
   .option("--verbose", "print verbose log")
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts(
