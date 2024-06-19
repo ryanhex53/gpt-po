@@ -74,7 +74,7 @@ export function translate(
         ...dicts,
         { 
           role: "user",
-          content: text
+          content: "<translate>" + text + "</translate>"
         },
       ],
     },
@@ -145,7 +145,18 @@ export async function translatePo(
     const trans = list[i];
     try {
       const res = await translate(trans.msgid, source, lang, model, trans.comments);
-      trans.msgstr[0] = res.data.choices[0].message?.content || trans.msgstr[0];
+      var translated = res.data.choices[0].message?.content || trans.msgstr[0];
+      
+      if(!translated.startsWith('<translated>') && !translated.endsWith('</translated>'))
+      {
+        // We got an error response
+        console.log("Error: Unable to translate string [" + trans.msgid + "]. Bot says [" + translated + "]");
+        continue;
+      }
+      
+      // We got a valid translation response
+      trans.msgstr[0] = translated.replace('<translated>', '').replace('</translated>', '');
+      
       modified = true;
       if (verbose) {
         console.log(trans.msgid);
