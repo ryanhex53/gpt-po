@@ -35,13 +35,14 @@ program
   .option("-src, --source <lang>", "source language (ISO 639-1)", "en")
   .option("-l, --lang <lang>", "target language (ISO 639-1)")
   .option("--verbose", "print verbose log")
+  .option("--context <file>", "text file that provides the bot additional context")
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts(
       "dir",
     ),
   )
   .action(async (args) => {
-    const { key, host, model, po, dir, source, lang, verbose, output, checkRegx } = args;
+    const { key, host, model, po, dir, source, lang, verbose, output, context } = args;
     if (host) {
       process.env.OPENAI_API_HOST = host;
     }
@@ -55,9 +56,9 @@ program
     }
     init();
     if (po) {
-      await translatePo(model, po, source, lang, verbose, output);
+      await translatePo(model, po, source, lang, verbose, output, context);
     } else if (dir) {
-      await translatePoDir(model, dir, source, lang, verbose);
+      await translatePoDir(model, dir, source, lang, verbose, context);
     } else {
       console.error("po file or directory is required");
       process.exit(1);

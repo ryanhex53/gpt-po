@@ -24,7 +24,7 @@ Set `OPENAI_API_KEY` before using this tool.
 - `gpt-po --po <file> --lang <lang>` Translate specified po files to a designated target language (overriding language specified in po file).
 - `gpt-po --dir .` Translate all po files in current directory to a designated target language.
 - `gpt-po userdict` Modify or view user dictionaries
-- `gpt-po userdict --explore` Explore user dictionaries, if you want add new dictionaries or modify existing dictionaries. dictionaries can be named as `dictionary-<lang>.json`, for example, `dictionary-simplified-chinese.json` is the dictionary for Simplified Chinese.
+- `gpt-po userdict --explore` Explore user dictionaries, if you want add new dictionaries or modify existing dictionaries. dictionaries can be named as `dictionary-<lang>.json`, for example, `dictionary-zh.json` is the dictionary for Simplified Chinese.
 - `gpt-po systemprompt` Modify or view system prompts, if you are not sure how to use it, you can leave it alone
 - `gpt-po systemprompt --reset` Reset system prompts
 
@@ -54,14 +54,15 @@ translate po file (default command)
 Options:
   -k, --key <key>        openai api key (env: OPENAI_API_KEY)
   --host <host>          openai api host (env: OPENAI_API_HOST)
-  --model <model>        openai model (choices: "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
-                         default: "gpt-3.5-turbo")
+  --model <model>        openai model (choices: "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
+                         default: "gpt-4o")
   --po <file>            po file path
   --dir <dir>            po file directory
   -src, --source <lang>  source language (default: "english")
   --verbose              show verbose log
-  -l, --lang <lang>      target language (default: "simplified chinese")
+  -l, --lang <lang>      target language (ISO 639-1 code)
   -o, --output <file>    output file path, overwirte po file by default
+  --context              context file path (provides additional context to the bot)
   -h, --help             display help for command
 ```
 

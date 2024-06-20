@@ -37,7 +37,8 @@ export function translate(
   src: string,
   lang: string,
   model: string,
-  comments: GetTextTranslation["comments"]|undefined
+  comments: GetTextTranslation["comments"]|undefined,
+  contextFile: string
 ) {
   const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
   const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
@@ -49,10 +50,14 @@ export function translate(
     .flat();
   
   var notes: string = ""
-
+  
   if(comments != undefined && comments.extracted != undefined)
     notes = comments.extracted
 
+  var context = "";
+  if(contextFile !== undefined)
+      context = "\n\n" + fs.readFileSync(contextFile, "utf-8");
+  
   return _openai.createChatCompletion(
     {
       model,
@@ -60,7 +65,7 @@ export function translate(
       messages: [
         { 
           role: "system", 
-          content: _systemprompt
+          content: _systemprompt + context
         },
         {
           role: "user",
@@ -91,6 +96,7 @@ export async function translatePo(
   lang: string,
   verbose: boolean,
   output: string,
+  contextFile: string
 ) {
   const potrans = await parsePo(po);
   
@@ -144,7 +150,7 @@ export async function translatePo(
     }
     const trans = list[i];
     try {
-      const res = await translate(trans.msgid, source, lang, model, trans.comments);
+      const res = await translate(trans.msgid, source, lang, model, trans.comments, contextFile);
       var translated = res.data.choices[0].message?.content || trans.msgstr[0];
       
       if(!translated.startsWith('<translated>') && !translated.endsWith('</translated>'))
@@ -191,13 +197,14 @@ export async function translatePoDir(
   source: string,
   lang: string,
   verbose: boolean,
+  contextFile: string
 ) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     if (file.endsWith(".po")) {
       const po = join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, po);
+      await translatePo(model, po, source, lang, verbose, po, contextFile);
     }
   }
 }
