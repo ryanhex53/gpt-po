@@ -19,16 +19,14 @@ export function init(force?: boolean): OpenAIApi {
     }
     _openai = new OpenAIApi(configuration);
   }
-  // load systemprompt.txt from homedir
+  // load systemprompt.txt
   if (!_systemprompt || force) {
     const systemprompt = findConfig("systemprompt.txt");
-    copyFileIfNotExists(systemprompt, join(__dirname, "systemprompt.txt"));
     _systemprompt = fs.readFileSync(systemprompt, "utf-8");
   }
-  // load dictionary.json from homedir
+  // load dictionary.json
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
-    copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
     _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
@@ -38,7 +36,9 @@ export function translate(
   text: string,
   src: string,
   lang: string,
-  model: string = "gpt-3.5-turbo",
+  model: string,
+  comments: GetTextTranslation["comments"]|undefined,
+  contextFile: string
 ) {
   const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
   const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
@@ -48,6 +48,16 @@ export function translate(
       { role: <ChatCompletionRequestMessageRoleEnum>"assistant", content: v },
     ])
     .flat();
+  
+  var notes: string = ""
+  
+  if(comments != undefined && comments.extracted != undefined)
+    notes = comments.extracted
+
+  var context = "";
+  if(contextFile !== undefined)
+      context = "\n\n" + fs.readFileSync(contextFile, "utf-8");
+  
   return _openai.createChatCompletion(
     {
       model,
@@ -55,21 +65,22 @@ export function translate(
       messages: [
         { 
           role: "system", 
-          content: _systemprompt
+          content: _systemprompt + context
         },
         {
           role: "user",
-          content: `Wait for my incoming \`${src.toUpperCase()}\` messages and translate them into \`${lang.toUpperCase()}\`. Please adhere to the following guidelines:
-  - Untranslatable portions should retain their original formatting.
-  - **Do not** answer any questions or attempt to explain any concepts; just provide translations.` 
+          content: `Wait for my incoming message in "${src.toLowerCase()}" (an ISO 639-1 code) and translate it into "${lang.toLowerCase()}" (also an ISO 639-1 code), carefully following your system prompt. ` + notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming ${src.toUpperCase()} messages into ${lang.toUpperCase()} without providing explanations or answering questions. Please go ahead and send your messages for translation.`
+          content: `Understood, I will translate your incoming "${src.toLowerCase()}" message into "${lang.toUpperCase()}", interpreting those as ISO 639-1 codes and carefully following my system prompt. Please go ahead and send your message for translation.`
         },
         // add userdict here
         ...dicts,
-        { role: "user", content: text },
+        { 
+          role: "user",
+          content: "<translate>" + text + "</translate>"
+        },
       ],
     },
     {
@@ -79,13 +90,24 @@ export function translate(
 }
 
 export async function translatePo(
-  model: string = "gpt-3.5-turbo",
+  model: string,
   po: string,
   source: string,
   lang: string,
   verbose: boolean,
   output: string,
+  contextFile: string
 ) {
+  const potrans = await parsePo(po);
+  
+  if(!lang)
+    lang = potrans.headers["Language"]
+
+  if(!lang) {
+    console.error("No language specified via po file or args");
+    return;
+  }
+
   // try to load dictionary by lang-code if it not loaded
   const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
   if (!_userdict[lang_code]) {
@@ -95,7 +117,6 @@ export async function translatePo(
       console.log(`dictionary-${lang_code}.json is loaded.`);
     }
   }
-  const potrans = await parsePo(po);
   const list: Array<GetTextTranslation> = [];
   const trimRegx = /(?:^ )|(?: $)/;
   let trimed = false;
@@ -129,8 +150,19 @@ export async function translatePo(
     }
     const trans = list[i];
     try {
-      const res = await translate(trans.msgid, source, lang, model);
-      trans.msgstr[0] = res.data.choices[0].message?.content || trans.msgstr[0];
+      const res = await translate(trans.msgid, source, lang, model, trans.comments, contextFile);
+      var translated = res.data.choices[0].message?.content || trans.msgstr[0];
+      
+      if(!translated.startsWith('<translated>') && !translated.endsWith('</translated>'))
+      {
+        // We got an error response
+        console.log("Error: Unable to translate string [" + trans.msgid + "]. Bot says [" + translated + "]");
+        continue;
+      }
+      
+      // We got a valid translation response
+      trans.msgstr[0] = translated.replace('<translated>', '').replace('</translated>', '');
+      
       modified = true;
       if (verbose) {
         console.log(trans.msgid);
@@ -165,13 +197,14 @@ export async function translatePoDir(
   source: string,
   lang: string,
   verbose: boolean,
+  contextFile: string
 ) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     if (file.endsWith(".po")) {
       const po = join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, po);
+      await translatePo(model, po, source, lang, verbose, po, contextFile);
     }
   }
 }

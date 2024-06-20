@@ -96,7 +96,7 @@ export function findConfig(fileName: string): string {
   const homeDir = homedir();
 
   const filePaths = [
-    path.join(currentDir, ".gpt-po", fileName),
+    path.join(currentDir, "src", fileName),
     path.join(gitDir, ".gpt-po", fileName),
     path.join(homeDir, ".config", ".gpt-po", fileName)
   ];
