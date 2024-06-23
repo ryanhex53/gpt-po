@@ -57,7 +57,7 @@ export function translate(
   var context = "";
   if(contextFile !== undefined)
       context = "\n\n" + fs.readFileSync(contextFile, "utf-8");
-
+  
   return _openai.createChatCompletion(
     {
       model,
