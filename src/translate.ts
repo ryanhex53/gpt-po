@@ -69,11 +69,11 @@ export function translate(
         },
         {
           role: "user",
-          content: `Wait for my incoming message in "${src.toLowerCase()}" (an ISO 639-1 code) and translate it into "${lang.toLowerCase()}" (also an ISO 639-1 code), carefully following your system prompt. ` + notes
+          content: `Wait for my incoming message in "${src}" and translate it into "${lang}", carefully following your system prompt. ` + notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming "${src.toLowerCase()}" message into "${lang.toUpperCase()}", interpreting those as ISO 639-1 codes and carefully following my system prompt. Please go ahead and send your message for translation.`
+          content: `Understood, I will translate your incoming "${src}" message into "${lang}", carefully following my system prompt. Please go ahead and send your message for translation.`
         },
         // add userdict here
         ...dicts,
