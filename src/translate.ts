@@ -28,7 +28,7 @@ export function init(force?: boolean): OpenAIApi {
   // load dictionary.json from homedir
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
-    copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
+    copyFileIfNotExists(userdict, join(__dirname, "dictionary-template.json"));
     _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
