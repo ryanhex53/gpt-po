@@ -19,14 +19,16 @@ export function init(force?: boolean): OpenAIApi {
     }
     _openai = new OpenAIApi(configuration);
   }
-  // load systemprompt.txt
+  // load systemprompt.txt from homedir
   if (!_systemprompt || force) {
     const systemprompt = findConfig("systemprompt.txt");
+    copyFileIfNotExists(systemprompt, join(__dirname, "systemprompt.txt"));
     _systemprompt = fs.readFileSync(systemprompt, "utf-8");
   }
-  // load dictionary.json
+  // load dictionary.json from homedir
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
+    copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
     _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
