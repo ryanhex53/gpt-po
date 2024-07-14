@@ -84,7 +84,7 @@ export function gitRootDir(dir?: string): string|null {
 
 /**
  * find config file in the following order:
- * 1. current directory
+ * 1. current working directory of the Node.js process
  * 2. git root directory
  * 3. home directory
  * @param fileName 
@@ -96,9 +96,10 @@ export function findConfig(fileName: string): string {
   const homeDir = homedir();
 
   const filePaths = [
-    path.join(currentDir, "src", fileName),
+    path.join(currentDir, ".gpt-po", fileName),
+    path.join(currentDir, fileName),
     path.join(gitDir, ".gpt-po", fileName),
-    path.join(homeDir, ".config", ".gpt-po", fileName)
+    path.join(homeDir, ".gpt-po", fileName)
   ];
   // check if file exists and return the first one
   for (const filePath of filePaths) {
