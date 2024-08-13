@@ -21,6 +21,7 @@ program
       .default("gpt-4o")
       .choices([
         "gpt-4o",
+        "gpt-4o-mini",
         "gpt-4-turbo",
         "gpt-4",
         "gpt-4-0314",
