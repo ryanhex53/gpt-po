@@ -1,4 +1,4 @@
-import { compilePo, parsePo } from "./utils";
+import { compilePo, parsePo } from "./utils.js";
 
 export async function sync(po: string, pot: string) {
   const potrans = await parsePo(po);
