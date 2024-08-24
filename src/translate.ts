@@ -1,34 +1,40 @@
 import * as fs from "fs";
 import { GetTextTranslation } from "gettext-parser";
-import { ChatCompletionRequestMessageRoleEnum, Configuration, OpenAIApi } from "openai";
-import { join } from "path";
-import * as pkg from "../package.json";
-import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } from "./utils";
+import { OpenAI } from "openai";
+import path from "path";
+import { fileURLToPath } from "url";
+import * as pkg from "../package.json" assert { type: "json" };
+import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } from "./utils.js";
 
-let _openai: OpenAIApi;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+let _openai: OpenAI;
 let _systemprompt: string;
 let _userdict: { [lang: string]: { [key: string]: string } };
 
-export function init(force?: boolean): OpenAIApi {
+export function init(force?: boolean): OpenAI {
   if (!_openai || force) {
-    const configuration = new Configuration({
+    let configuration = {
       apiKey: process.env.OPENAI_API_KEY,
-    });
+    };
+
+    _openai = new OpenAI(configuration);
+
     if (process.env.OPENAI_API_HOST) {
-      configuration.basePath = process.env.OPENAI_API_HOST.replace(/\/+$/, "") + "/v1";
+      _openai.baseURL = process.env.OPENAI_API_HOST.replace(/\/+$/, "") + "/v1";
     }
-    _openai = new OpenAIApi(configuration);
   }
   // load systemprompt.txt from homedir
   if (!_systemprompt || force) {
     const systemprompt = findConfig("systemprompt.txt");
-    copyFileIfNotExists(systemprompt, join(__dirname, "systemprompt.txt"));
+    copyFileIfNotExists(systemprompt, path.join(__dirname, "systemprompt.txt"));
     _systemprompt = fs.readFileSync(systemprompt, "utf-8");
   }
   // load dictionary.json from homedir
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
-    copyFileIfNotExists(userdict, join(__dirname, "dictionary.json"));
+    copyFileIfNotExists(userdict, path.join(__dirname, "dictionary.json"));
     _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
@@ -46,27 +52,27 @@ export function translate(
   const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
     .filter(([k, _]) => text.toLowerCase().includes(k.toLowerCase()))
     .map(([k, v]) => [
-      { role: <ChatCompletionRequestMessageRoleEnum>"user", content: k },
-      { role: <ChatCompletionRequestMessageRoleEnum>"assistant", content: v },
+      { role: "user", content: k },
+      { role: "assistant", content: v },
     ])
     .flat();
-  
+
   var notes: string = ""
-  
+
   if(comments != undefined && comments.extracted != undefined)
     notes = comments.extracted
 
   var context = "";
   if(contextFile !== undefined)
       context = "\n\n" + fs.readFileSync(contextFile, "utf-8");
-  
-  return _openai.createChatCompletion(
+
+  return _openai.chat.completions.create(
     {
-      model,
+      model: model,
       temperature: 0.1,
       messages: [
-        { 
-          role: "system", 
+        {
+          role: "system",
           content: _systemprompt + context
         },
         {
@@ -79,12 +85,12 @@ export function translate(
         },
         // add userdict here
         ...dicts,
-        { 
+        {
           role: "user",
           content: "<translate>" + text + "</translate>"
         },
       ],
-    },
+    } as any,
     {
       timeout: 20000,
     },
@@ -101,7 +107,7 @@ export async function translatePo(
   contextFile: string
 ) {
   const potrans = await parsePo(po);
-  
+
   if(!lang)
     lang = potrans.headers["Language"]
 
@@ -141,7 +147,7 @@ export async function translatePo(
     console.log("done.");
     return;
   }
-  potrans.headers["Last-Translator"] = `gpt-po v${pkg.version}`;
+  potrans.headers["Last-Translator"] = `gpt-po v${pkg.default.version}`;
   let err429 = false;
   let modified = false;
   for (let i = 0; i < list.length; i++) {
@@ -153,18 +159,18 @@ export async function translatePo(
     const trans = list[i];
     try {
       const res = await translate(trans.msgid, source, lang, model, trans.comments, contextFile);
-      var translated = res.data.choices[0].message?.content || trans.msgstr[0];
-      
+      var translated = res.choices[0].message?.content || trans.msgstr[0];
+
       if(!translated.startsWith('<translated>') && !translated.endsWith('</translated>'))
       {
         // We got an error response
         console.log("Error: Unable to translate string [" + trans.msgid + "]. Bot says [" + translated + "]");
         continue;
       }
-      
+
       // We got a valid translation response
       trans.msgstr[0] = translated.replace('<translated>', '').replace('</translated>', '');
-      
+
       modified = true;
       if (verbose) {
         console.log(trans.msgid);
@@ -204,7 +210,7 @@ export async function translatePoDir(
   const files = fs.readdirSync(dir);
   for (const file of files) {
     if (file.endsWith(".po")) {
-      const po = join(dir, file);
+      const po = path.join(dir, file);
       console.log(`translating ${po}`);
       await translatePo(model, po, source, lang, verbose, po, contextFile);
     }
