@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 
 import { Command, Option } from "commander";
-import * as pkg from "../package.json";
-import { sync } from "./sync";
-import { init, translatePo, translatePoDir } from "./translate";
-import { copyFileIfNotExists, compilePo, findConfig, openFileByDefault, openFileExplorer, parsePo } from "./utils";
-import { removeByOptions } from "./manipulate";
+import path from "path";
+import { fileURLToPath } from "url";
+import * as pkg from "../package.json" assert { type: "json" };
+import { sync } from "./sync.js";
+import { init, translatePo, translatePoDir } from "./translate.js";
+import { copyFileIfNotExists, compilePo, findConfig, openFileByDefault, openFileExplorer, parsePo } from "./utils.js";
+import { removeByOptions } from "./manipulate.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const program = new Command();
 
-program.name(pkg.name).version(pkg.version).description(pkg.description);
+program.name(pkg.default.name).version(pkg.default.version).description(pkg.default.description);
 
 program
   .command("translate", { isDefault: true })
