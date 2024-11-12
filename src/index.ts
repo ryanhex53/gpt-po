@@ -3,7 +3,7 @@
 import { Command, Option } from "commander";
 import path from "path";
 import { fileURLToPath } from "url";
-import * as pkg from "../package.json" assert { type: "json" };
+import pkg from "../package.json" with { type: "json" };
 import { sync } from "./sync.js";
 import { init, translatePo, translatePoDir } from "./translate.js";
 import { copyFileIfNotExists, compilePo, findConfig, openFileByDefault, openFileExplorer, parsePo } from "./utils.js";
@@ -14,28 +14,14 @@ const __dirname = path.dirname(__filename);
 
 const program = new Command();
 
-program.name(pkg.default.name).version(pkg.default.version).description(pkg.default.description);
+program.name(pkg.name).version(pkg.version).description(pkg.description);
 
 program
   .command("translate", { isDefault: true })
   .description("translate po file (default command)")
   .addOption(new Option("-k, --key <key>", "openai api key").env("OPENAI_API_KEY"))
   .addOption(new Option("--host <host>", "openai api host").env("OPENAI_API_HOST"))
-  .addOption(
-    new Option("--model <model>", "openai model")
-      .default("gpt-4o")
-      .choices([
-        "gpt-4o",
-        "gpt-4o-mini",
-        "gpt-4-turbo",
-        "gpt-4",
-        "gpt-4-0314",
-        "gpt-4-32k",
-        "gpt-4-32k-0314",
-        "gpt-3.5-turbo",
-        "gpt-3.5-turbo-0301",
-      ]),
-  )
+  .addOption(new Option("--model <model>", "openai model").env("OPENAI_MODEL").default("gpt-4o-mini"))
   .addOption(new Option("--po <file>", "po file path").conflicts("dir"))
   .addOption(new Option("--dir <dir>", "po file directory").conflicts("po"))
   .option("-src, --source <lang>", "source language (ISO 639-1)", "en")

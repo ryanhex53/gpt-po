@@ -3,7 +3,7 @@ import { GetTextTranslation } from "gettext-parser";
 import { OpenAI } from "openai";
 import path from "path";
 import { fileURLToPath } from "url";
-import * as pkg from "../package.json" assert { type: "json" };
+import pkg from "../package.json" with { type: "json" };
 import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } from "./utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -147,7 +147,7 @@ export async function translatePo(
     console.log("done.");
     return;
   }
-  potrans.headers["Last-Translator"] = `gpt-po v${pkg.default.version}`;
+  potrans.headers["Last-Translator"] = `gpt-po v${pkg.version}`;
   let err429 = false;
   let modified = false;
   for (let i = 0; i < list.length; i++) {

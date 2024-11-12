@@ -54,8 +54,7 @@ translate po file (default command)
 Options:
   -k, --key <key>        openai api key (env: OPENAI_API_KEY)
   --host <host>          openai api host (env: OPENAI_API_HOST)
-  --model <model>        openai model (choices: "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301",
-                         default: "gpt-4o")
+  --model <model>        openai model (default: "gpt-4o-mini", env: OPENAI_MODEL)
   --po <file>            po file path
   --dir <dir>            po file directory
   -src, --source <lang>  source language (default: "english")

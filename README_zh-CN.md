@@ -56,7 +56,7 @@ npm install gpt-po
 选项:
   -k, --key <key>        openai api key (环境变量: OPENAI_API_KEY)
   --host <host>          openai api host (环境变量: OPENAI_API_HOST)
-  --model <model>        openai 模型 (选项: "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-4-0314", "gpt-4-32k", "gpt-4-32k-0314", "gpt-3.5-turbo", "gpt-3.5-turbo-0301", 默认: "gpt-4o")
+  --model <model>        openai 模型 (默认: "gpt-4o-mini", 环境变量: OPENAI_MODEL)
   --po <file>            po 文件路径
   --dir <dir>            po 文件目录
   -src, --source <lang>  源语言 (默认: "english")
