@@ -15,7 +15,7 @@ export interface RemoveByOptions {
  */
 export function removeByOptions(
   potrans: GetTextTranslations,
-  options: RemoveByOptions | undefined,
+  options: RemoveByOptions | undefined
 ): GetTextTranslations {
   const fuzzyRegx = /\bfuzzy\b/;
   const obsoleteRegx = /\bobsolete\b/;
@@ -60,7 +60,6 @@ export function removeByOptions(
           delete potrans.translations[ctx][msgid];
         }
       }
-
     }
   }
   return potrans;

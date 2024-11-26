@@ -7,6 +7,8 @@ gettext(po)文件翻译工具，支持自定义系统提示词和用户字典，
 
 使用其他语言阅读：[English](./README.md) | 简体中文
 
+<a href="https://buymeacoffee.com/ryanhex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="请我喝杯咖啡" height="41" width="174"></a>
+
 ## 安装
 
 ```
@@ -27,8 +29,6 @@ npm install gpt-po
 - `gpt-po --dir .` 将当前目录下的所有 po 文件翻译成目标语言。
 - `gpt-po userdict` 修改或查看用户词典。
 - `gpt-po userdict --explore` 浏览用户词典，如果您想添加新词典或修改现有词典，词典可以命名为 `dictionary-<lang>.json`，例如 `dictionary-zh.json` 是简体中文词典。
-- `gpt-po systemprompt` 修改或查看系统提示，如果您不确定如何使用它，可以忽略。
-- `gpt-po systemprompt --reset` 重置系统提示。
 
 ```
 用法: gpt-po [options] [command]
@@ -42,7 +42,6 @@ npm install gpt-po
 命令:
   translate [options]     翻译 po 文件（默认命令）
   sync [options]          根据 pot 文件更新 po 文件
-  systemprompt [options]  打开/编辑系统提示
   userdict [options]      打开/编辑用户词典
   remove [options]        通过选项删除 po 条目
   help [command]          显示命令帮助
@@ -82,4 +81,15 @@ npm install gpt-po
   -ft, --fuzzy-translated           删除模糊翻译条目
   -rc, --reference-contains <text>  删除引用包含文本的条目，文本可以是正则表达式，例如 /text/ig
   -h, --help                        显示命令帮助
+```
+
+```
+用法: gpt-po sync [options]
+
+从 pot 文件中更新条目到 po 文件
+
+Options:
+  --po <file>   po 文件路径
+  --pot <file>  pot 文件路径
+  -h, --help    显示命令帮助
 ```

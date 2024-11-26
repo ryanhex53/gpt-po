@@ -7,6 +7,8 @@ Translation tool for gettext (po) files that supports custom system prompts and 
 
 Read in other languages: English | [简体中文](./README_zh-CN.md)
 
+<a href="https://buymeacoffee.com/ryanhex" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-red.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
 ## Installation
 
 ```
@@ -25,8 +27,6 @@ Set `OPENAI_API_KEY` before using this tool.
 - `gpt-po --dir .` Translate all po files in current directory to a designated target language.
 - `gpt-po userdict` Modify or view user dictionaries
 - `gpt-po userdict --explore` Explore user dictionaries, if you want add new dictionaries or modify existing dictionaries. dictionaries can be named as `dictionary-<lang>.json`, for example, `dictionary-zh.json` is the dictionary for Simplified Chinese.
-- `gpt-po systemprompt` Modify or view system prompts, if you are not sure how to use it, you can leave it alone
-- `gpt-po systemprompt --reset` Reset system prompts
 
 ```
 Usage: gpt-po [options] [command]
@@ -40,7 +40,6 @@ Options:
 Commands:
   translate [options]     translate po file (default command)
   sync [options]          update po from pot file
-  systemprompt [options]  open/edit system prompt
   userdict [options]      open/edit user dictionary
   remove [options]        remove po entries by options
   help [command]          display help for command
@@ -80,4 +79,15 @@ Options:
   -ft, --fuzzy-translated           remove fuzzy translated entries
   -rc, --reference-contains <text>  remove entries whose reference contains text, text can be a regular expression like /text/ig
   -h, --help                        display help for command
+```
+
+```
+Usage: gpt-po sync [options]
+
+update po from pot file
+
+Options:
+  --po <file>   po file path
+  --pot <file>  pot file path
+  -h, --help    display help for command
 ```

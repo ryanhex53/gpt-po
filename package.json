@@ -1,6 +1,6 @@
 {
   "name": "gpt-po",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "command tool for translate po files by gpt",
   "main": "lib/src/index.js",
   "type": "module",

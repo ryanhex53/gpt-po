@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import { GetTextTranslation } from "gettext-parser";
 import { OpenAI } from "openai";
+import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pkg from "../package.json" with { type: "json" };
@@ -11,12 +12,13 @@ const __dirname = path.dirname(__filename);
 
 let _openai: OpenAI;
 let _systemprompt: string;
+let _userprompt: string;
 let _userdict: { [lang: string]: { [key: string]: string } };
 
 export function init(force?: boolean): OpenAI {
   if (!_openai || force) {
     let configuration = {
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.OPENAI_API_KEY
     };
 
     _openai = new OpenAI(configuration);
@@ -25,48 +27,62 @@ export function init(force?: boolean): OpenAI {
       _openai.baseURL = process.env.OPENAI_API_HOST.replace(/\/+$/, "") + "/v1";
     }
   }
-  // load systemprompt.txt from homedir
+  // load systemprompt.txt from project
   if (!_systemprompt || force) {
-    const systemprompt = findConfig("systemprompt.txt");
-    copyFileIfNotExists(systemprompt, path.join(__dirname, "systemprompt.txt"));
-    _systemprompt = fs.readFileSync(systemprompt, "utf-8");
+    _systemprompt = fs.readFileSync(path.join(__dirname, "systemprompt.txt"), "utf-8");
+  }
+  // load userprompt.txt from project
+  if (!_userprompt || force) {
+    _userprompt = fs.readFileSync(path.join(__dirname, "userprompt.txt"), "utf-8");
   }
   // load dictionary.json from homedir
   if (!_userdict || force) {
     const userdict = findConfig("dictionary.json");
     copyFileIfNotExists(userdict, path.join(__dirname, "dictionary.json"));
-    _userdict = { "default": JSON.parse(fs.readFileSync(userdict, "utf-8")) };
+    _userdict = { default: JSON.parse(fs.readFileSync(userdict, "utf-8")) };
   }
   return _openai;
 }
 
-export function translate(
-  text: string,
+export async function translate(
   src: string,
   lang: string,
   model: string,
-  comments: GetTextTranslation["comments"]|undefined,
+  translations: GetTextTranslation[],
   contextFile: string
 ) {
-  const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
-  const dicts = Object.entries(_userdict[lang_code] || _userdict["default"])
-    .filter(([k, _]) => text.toLowerCase().includes(k.toLowerCase()))
-    .map(([k, v]) => [
-      { role: "user", content: k },
-      { role: "assistant", content: v },
-    ])
-    .flat();
+  const lang_code = lang
+    .toLowerCase()
+    .trim()
+    .replace(/[\W_]+/g, "-");
 
-  var notes: string = ""
+  const dicts = Object.entries(_userdict[lang_code] || _userdict["default"]).reduce(
+    (acc, [k, v], idx) => {
+      if (translations.some((tr) => tr.msgid.toLowerCase().includes(k.toLowerCase()))) {
+        acc.user.push(`<translate index="${idx + 1}">${k}</translate>`);
+        acc.assistant.push(`<translated index="${idx + 1}">${v}</translated>`);
+      }
+      return acc;
+    },
+    { user: <string[]>[], assistant: <string[]>[] }
+  );
 
-  if(comments != undefined && comments.extracted != undefined)
-    notes = comments.extracted
+  const notes = translations
+    .reduce((acc: string[], tr) => {
+      if (tr.comments?.extracted) {
+        acc.push(tr.comments?.extracted);
+      }
+      return acc;
+    }, [])
+    .join("\n");
 
-  var context = "";
-  if(contextFile !== undefined)
-      context = "\n\n" + fs.readFileSync(contextFile, "utf-8");
+  const context = contextFile ? "\n\nContext: " + fs.readFileSync(contextFile, "utf-8") : "";
 
-  return _openai.chat.completions.create(
+  const translationsContent = translations
+    .map((tr, idx) => `<translate index="${idx + dicts.user.length + 1}">${tr.msgid}</translate>`)
+    .join("\n");
+
+  const res = await _openai.chat.completions.create(
     {
       model: model,
       temperature: 0.1,
@@ -77,24 +93,44 @@ export function translate(
         },
         {
           role: "user",
-          content: `Wait for my incoming message in "${src}" and translate it into "${lang}", carefully following your system prompt. ` + notes
+          content: `${_userprompt}\n\nWait for my incoming message in "${src}" and translate it into "${lang}"(a language code and an optional region code). ` +
+            notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming "${src}" message into "${lang}", carefully following my system prompt. Please go ahead and send your message for translation.`
+          content: `Understood, I will translate your incoming "${src}" message into "${lang}", carefully following guidelines. Please go ahead and send your message for translation.`
         },
-        // add userdict here
-        ...dicts,
+        // add userdict
+        ...(dicts.user.length > 0
+          ? <ChatCompletionMessageParam[]>[
+              { role: "user", content: dicts.user.join("\n") },
+              { role: "assistant", content: dicts.assistant.join("\n") }
+            ]
+          : []),
+        // add user translations
         {
           role: "user",
-          content: "<translate>" + text + "</translate>"
-        },
-      ],
-    } as any,
+          content: translationsContent
+        }
+      ]
+    },
     {
       timeout: 20000,
-    },
+      stream: false
+    }
   );
+
+  const content = res.choices[0].message.content ?? "";
+  translations.forEach((trans, idx) => {
+    const tag = `<translated index="${idx + dicts.user.length + 1}">`;
+    const s = content.indexOf(tag);
+    if (s > -1) {
+      const e = content.indexOf("</translated>", s);
+      trans.msgstr[0] = content.slice(s + tag.length, e);
+    } else {
+      console.error("Error: Unable to find translation for string [" + trans.msgid + "]");
+    }
+  });
 }
 
 export async function translatePo(
@@ -108,16 +144,18 @@ export async function translatePo(
 ) {
   const potrans = await parsePo(po);
 
-  if(!lang)
-    lang = potrans.headers["Language"]
+  if (!lang) lang = potrans.headers["Language"];
 
-  if(!lang) {
+  if (!lang) {
     console.error("No language specified via po file or args");
     return;
   }
 
   // try to load dictionary by lang-code if it not loaded
-  const lang_code = lang.toLowerCase().trim().replace(/[\W_]+/g, "-");
+  const lang_code = lang
+    .toLowerCase()
+    .trim()
+    .replace(/[\W_]+/g, "-");
   if (!_userdict[lang_code]) {
     const lang_dic_file = findConfig(`dictionary-${lang_code}.json`);
     if (fs.existsSync(lang_dic_file)) {
@@ -148,50 +186,49 @@ export async function translatePo(
     return;
   }
   potrans.headers["Last-Translator"] = `gpt-po v${pkg.version}`;
+  const translations = <GetTextTranslation[]>[];
   let err429 = false;
-  let modified = false;
-  for (let i = 0; i < list.length; i++) {
+  for (let i = 0, c = 0; i < list.length; i++) {
     if (i == 0) printProgress(i, list.length);
     if (err429) {
       // sleep for 20 seconds.
       await new Promise((resolve) => setTimeout(resolve, 20000));
     }
     const trans = list[i];
-    try {
-      const res = await translate(trans.msgid, source, lang, model, trans.comments, contextFile);
-      var translated = res.choices[0].message?.content || trans.msgstr[0];
-
-      if(!translated.startsWith('<translated>') && !translated.endsWith('</translated>'))
-      {
-        // We got an error response
-        console.log("Error: Unable to translate string [" + trans.msgid + "]. Bot says [" + translated + "]");
-        continue;
-      }
-
-      // We got a valid translation response
-      trans.msgstr[0] = translated.replace('<translated>', '').replace('</translated>', '');
-
-      modified = true;
-      if (verbose) {
-        console.log(trans.msgid);
-        console.log(trans.msgstr[0]);
-      }
-      printProgress(i + 1, list.length);
-      await compilePo(potrans, output || po);
-    } catch (error: any) {
-      if (error.response) {
-        if (error.response.status == 429) {
-          // caused by rate limit exceeded, should sleep for 20 seconds.
-          err429 = true;
-          --i;
-        } else {
-          console.error(error.response.status);
-          console.log(error.response.data);
+    if (c < 2000) {
+      translations.push(trans);
+      c += trans.msgid.length;
+    }
+    if (c >= 2000 || i == list.length - 1) {
+      try {
+        await translate(source, lang, model, translations, contextFile);
+        if (verbose) {
+          translations.forEach((trans) => {
+            console.log(trans.msgid);
+            console.log(trans.msgstr[0]);
+          });
         }
-      } else {
-        console.error(error.message);
-        if (error.code == "ECONNABORTED") {
-          console.log('you may need to set "HTTPS_PROXY" to reach openai api.')
+        translations.length = 0;
+        c = 0;
+        // update progress
+        printProgress(i + 1, list.length);
+        // save po file after each 2000 characters
+        await compilePo(potrans, output || po);
+      } catch (error: any) {
+        if (error.response) {
+          if (error.response.status == 429) {
+            // caused by rate limit exceeded, should sleep for 20 seconds.
+            err429 = true;
+            --i;
+          } else {
+            console.error(error.response.status);
+            console.log(error.response.data);
+          }
+        } else {
+          console.error(error.message);
+          if (error.code == "ECONNABORTED") {
+            console.log('you may need to set "HTTPS_PROXY" to reach openai api.');
+          }
         }
       }
     }

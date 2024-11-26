@@ -1,5 +1,8 @@
 {
   "tabWidth": 2,
   "useTabs": false,
-  "printWidth": 100
+  "quoteProps": "preserve",
+  "printWidth": 110,
+  "trailingComma": "none",
+  "semi": true
 }

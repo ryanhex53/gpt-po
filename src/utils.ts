@@ -38,14 +38,24 @@ export function parsePo(poFile: string, defaultCharset?: string): Promise<GetTex
   return new Promise((resolve, reject) => {
     fs.readFile(poFile, (err, buffer) => {
       if (err) reject(err);
-      var result = po.parse(buffer, defaultCharset ?? "utf-8");
+      const result = po.parse(buffer, defaultCharset ?? "utf-8");
       resolve(result);
     });
   });
 }
 
-export function compilePo(data: GetTextTranslations, poFile: string): Promise<void> {
-  const buffer = po.compile(data, { foldLength: 120 });
+export type compileOptions = {
+  foldLength?: number;
+  sort?: boolean | ((a: never, b: never) => number);
+  escapeCharacters?: boolean;
+};
+
+export function compilePo(
+  data: GetTextTranslations,
+  poFile: string,
+  options: compileOptions = { foldLength: 120, sort: false, escapeCharacters: true }
+): Promise<void> {
+  const buffer = po.compile(data, options);
   return new Promise((resolve, reject) => {
     fs.writeFile(poFile, buffer, (err) => {
       if (err) reject(err);
@@ -65,7 +75,7 @@ export function printProgress(progress: number, total: number, extra?: string): 
   process.stdout.write(`\r${bar}${dots} ${percent}% ${progress}/${total} ${extra || ""}`);
 }
 
-export function gitRootDir(dir?: string): string|null {
+export function gitRootDir(dir?: string): string | null {
   // if dir is not provided, use current working directory
   dir = dir || process.cwd();
   // check if dir is a git repository
@@ -87,7 +97,7 @@ export function gitRootDir(dir?: string): string|null {
  * 1. current working directory of the Node.js process
  * 2. git root directory
  * 3. home directory
- * @param fileName 
+ * @param fileName
  * @returns full path of the config file
  */
 export function findConfig(fileName: string): string {
@@ -99,7 +109,7 @@ export function findConfig(fileName: string): string {
     path.join(currentDir, ".gpt-po", fileName),
     path.join(currentDir, fileName),
     path.join(gitDir, ".gpt-po", fileName),
-    path.join(homeDir, ".gpt-po", fileName)
+    path.join(homeDir, ".gpt-po", fileName),
   ];
   // check if file exists and return the first one
   for (const filePath of filePaths) {
@@ -115,9 +125,9 @@ export function findConfig(fileName: string): string {
  * @param location folder or file path
  */
 export function openFileExplorer(location: string): void {
-  if (platform() === 'win32') {
+  if (platform() === "win32") {
     exec(`explorer.exe "${path.dirname(location)}"`);
-  } else if (platform() === 'darwin') {
+  } else if (platform() === "darwin") {
     exec(`open "${path.dirname(location)}"`);
   } else {
     // Assuming a Linux-based system
