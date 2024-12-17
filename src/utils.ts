@@ -44,7 +44,7 @@ export function parsePo(poFile: string, defaultCharset?: string): Promise<GetTex
   });
 }
 
-export type compileOptions = {
+export type CompileOptions = {
   foldLength?: number;
   sort?: boolean | ((a: never, b: never) => number);
   escapeCharacters?: boolean;
@@ -53,7 +53,7 @@ export type compileOptions = {
 export function compilePo(
   data: GetTextTranslations,
   poFile: string,
-  options: compileOptions = { foldLength: 120, sort: false, escapeCharacters: true }
+  options: CompileOptions = { foldLength: 120, sort: false, escapeCharacters: true }
 ): Promise<void> {
   const buffer = po.compile(data, options);
   return new Promise((resolve, reject) => {

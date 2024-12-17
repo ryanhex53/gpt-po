@@ -4,17 +4,18 @@ import { Command, Option } from "commander";
 import path from "path";
 import { fileURLToPath } from "url";
 import pkg from "../package.json" with { type: "json" };
+import { removeByOptions } from "./manipulate.js";
 import { sync } from "./sync.js";
 import { init, translatePo, translatePoDir } from "./translate.js";
 import {
-  copyFileIfNotExists,
+  CompileOptions,
   compilePo,
+  copyFileIfNotExists,
   findConfig,
   openFileByDefault,
   openFileExplorer,
   parsePo
 } from "./utils.js";
-import { removeByOptions } from "./manipulate.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,8 +24,34 @@ const program = new Command();
 
 program.name(pkg.name).version(pkg.version).description(pkg.description);
 
-program
-  .command("translate", { isDefault: true })
+const getCompileOptions = (args: any): CompileOptions => {
+  const foldLength = args.poFoldLen === "false" ? 0 : parseInt(args.poFoldLen);
+  const sort = args.poSort;
+  const escapeCharacters = args.poEscChars;
+  if (isNaN(foldLength)) {
+    console.error("--po-fold-length must be a number or false");
+    process.exit(1);
+  }
+  return { foldLength, sort, escapeCharacters };
+};
+
+class SharedOptionsCommand extends Command {
+  addCompileOptions() {
+    return this.option(
+      "--po-fold-len <length>",
+      "a gettext compile option, the length at which to fold message strings into newlines, set to 0 or false to disable folding",
+      "120"
+    )
+      .option("--po-sort", "a gettext compile option, sort entries by msgid", false)
+      .option(
+        "--po-esc-chars",
+        "a gettext compile option, escape characters in output, if false, will skip escape newlines and quotes characters functionality",
+        true
+      );
+  }
+}
+
+const translateCommand = new SharedOptionsCommand("translate")
   .description("translate po file (default command)")
   .addOption(new Option("-k, --key <key>", "openai api key").env("OPENAI_API_KEY"))
   .addOption(new Option("--host <host>", "openai api host").env("OPENAI_API_HOST"))
@@ -38,6 +65,7 @@ program
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts("dir")
   )
+  .addCompileOptions()
   .action(async (args) => {
     const { key, host, model, po, dir, source, lang, verbose, output, context } = args;
     if (host) {
@@ -52,24 +80,31 @@ program
       process.exit(1);
     }
     init();
+    const compileOptions = getCompileOptions(args);
     if (po) {
-      await translatePo(model, po, source, lang, verbose, output, context);
+      await translatePo(model, po, source, lang, verbose, output, context, compileOptions);
     } else if (dir) {
-      await translatePoDir(model, dir, source, lang, verbose, context);
+      await translatePoDir(model, dir, source, lang, verbose, context, compileOptions);
     } else {
       console.error("po file or directory is required");
       process.exit(1);
     }
   });
 
-program
-  .command("sync")
+program.addCommand(translateCommand, { isDefault: true });
+
+const syncCommand = new SharedOptionsCommand("sync")
   .description("update po from pot file")
   .requiredOption("--po <file>", "po file path")
   .requiredOption("--pot <file>", "pot file path")
-  .action(async ({ po, pot }) => {
-    await sync(po, pot);
+  .option("-o, --output <file>", "output file path, overwirte po file by default")
+  .addCompileOptions()
+  .action(async (args) => {
+    const { po, pot } = args;
+    await sync(po, pot, getCompileOptions(args));
   });
+
+program.addCommand(syncCommand, { isDefault: true });
 
 // program command `userdict` with help text `open/edit user dictionary`
 program
@@ -92,8 +127,7 @@ program
   });
 
 // program command `remove` with help text `remove po entries by options`
-program
-  .command("remove")
+const removeCommand = new SharedOptionsCommand("remove")
   .description("remove po entries by options")
   .requiredOption("--po <file>", "po file path")
   .option("--fuzzy", "remove fuzzy entries")
@@ -106,7 +140,10 @@ program
     "-rc, --reference-contains <text>",
     "remove entries whose reference contains text, text can be a regular expression like /text/ig"
   )
+  .option("-o, --output <file>", "output file path, overwirte po file by default")
+  .addCompileOptions()
   .action(async (args) => {
+    this;
     const {
       po,
       fuzzy,
@@ -128,8 +165,10 @@ program
     };
     const output = args.output || po;
     const translations = await parsePo(po);
-    await compilePo(removeByOptions(translations, options), output);
+    await compilePo(removeByOptions(translations, options), output, getCompileOptions(args));
     console.log("done");
   });
+
+program.addCommand(removeCommand);
 
 program.parse(process.argv);

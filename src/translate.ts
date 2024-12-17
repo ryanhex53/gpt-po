@@ -5,7 +5,14 @@ import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pkg from "../package.json" with { type: "json" };
-import { compilePo, copyFileIfNotExists, findConfig, parsePo, printProgress } from "./utils.js";
+import {
+  CompileOptions,
+  compilePo,
+  copyFileIfNotExists,
+  findConfig,
+  parsePo,
+  printProgress
+} from "./utils.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,7 +100,8 @@ export async function translate(
         },
         {
           role: "user",
-          content: `${_userprompt}\n\nWait for my incoming message in "${src}" and translate it into "${lang}"(a language code and an optional region code). ` +
+          content:
+            `${_userprompt}\n\nWait for my incoming message in "${src}" and translate it into "${lang}"(a language code and an optional region code). ` +
             notes
         },
         {
@@ -140,7 +148,8 @@ export async function translatePo(
   lang: string,
   verbose: boolean,
   output: string,
-  contextFile: string
+  contextFile: string,
+  compileOptions?: CompileOptions
 ) {
   const potrans = await parsePo(po);
 
@@ -179,7 +188,7 @@ export async function translatePo(
     }
   }
   if (trimed) {
-    await compilePo(potrans, po);
+    await compilePo(potrans, po, compileOptions);
   }
   if (list.length == 0) {
     console.log("done.");
@@ -213,7 +222,7 @@ export async function translatePo(
         // update progress
         printProgress(i + 1, list.length);
         // save po file after each 2000 characters
-        await compilePo(potrans, output || po);
+        await compilePo(potrans, output || po, compileOptions);
       } catch (error: any) {
         if (error.response) {
           if (error.response.status == 429) {
@@ -242,14 +251,15 @@ export async function translatePoDir(
   source: string,
   lang: string,
   verbose: boolean,
-  contextFile: string
+  contextFile: string,
+  compileOptions?: CompileOptions
 ) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
     if (file.endsWith(".po")) {
       const po = path.join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, po, contextFile);
+      await translatePo(model, po, source, lang, verbose, po, contextFile, compileOptions);
     }
   }
 }

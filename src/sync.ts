@@ -1,6 +1,6 @@
-import { compilePo, parsePo } from "./utils.js";
+import { CompileOptions, compilePo, parsePo } from "./utils.js";
 
-export async function sync(po: string, pot: string) {
+export async function sync(po: string, pot: string, compileOptions?: CompileOptions) {
   const potrans = await parsePo(po);
   const potrans2 = await parsePo(pot);
 
@@ -17,5 +17,5 @@ export async function sync(po: string, pot: string) {
     }
   }
   potrans.translations = potrans2.translations;
-  await compilePo(potrans, po);
+  await compilePo(potrans, po, compileOptions);
 }

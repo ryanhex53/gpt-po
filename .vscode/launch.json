@@ -13,7 +13,9 @@
         "remove",
         "--po",
         "C:\\Users\\Ryan\\Desktop\\test.po",
-        "--fuzzy"
+        "--fuzzy",
+        "--po-fold-len",
+        "90"
       ],
       "preLaunchTask": "tsc: build - tsconfig.json",
       "outFiles": [
