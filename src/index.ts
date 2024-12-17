@@ -29,7 +29,7 @@ const getCompileOptions = (args: any): CompileOptions => {
   const sort = args.poSort;
   const escapeCharacters = args.poEscChars;
   if (isNaN(foldLength)) {
-    console.error("--po-fold-length must be a number or false");
+    console.error("--po-fold-len must be a number or false");
     process.exit(1);
   }
   return { foldLength, sort, escapeCharacters };
@@ -104,7 +104,7 @@ const syncCommand = new SharedOptionsCommand("sync")
     await sync(po, pot, getCompileOptions(args));
   });
 
-program.addCommand(syncCommand, { isDefault: true });
+program.addCommand(syncCommand);
 
 // program command `userdict` with help text `open/edit user dictionary`
 program
