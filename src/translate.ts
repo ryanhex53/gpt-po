@@ -184,7 +184,7 @@ export async function translatePo(
 
       if (!trans.msgstr[0]) {
         list.push({
-          msgctxt: ctx || undefined,
+          msgctxt: trans.msgctxt || ctx,
           msgid,
           msgid_plural: trans.msgid_plural,
           msgstr: trans.msgstr,
