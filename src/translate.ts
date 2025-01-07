@@ -87,8 +87,8 @@ export async function translate(
 
   const translationsContent = translations
     .map((tr, idx) => {
-      const contextNote = tr.msgctxt ? `[Context: ${tr.msgctxt}] ` : "";
-      return `<translate index="${idx + dicts.user.length + 1}">${contextNote}${tr.msgid}</translate>`;
+      const contextAttr = tr.msgctxt ? ` context="${tr.msgctxt}"` : "";
+      return `<translate index="${idx + dicts.user.length + 1}"${contextAttr}>${tr.msgid}</translate>`;
     })
     .join("\n");
 
@@ -182,21 +182,17 @@ export async function translatePo(
     for (const [msgid, trans] of Object.entries(entries)) {
       if (msgid === "") continue;
 
-      // Create a new translation object that includes msgctxt
-      const translation = {
-        msgctxt: ctx === "" ? undefined : ctx, // Convert null to undefined
-        msgid: msgid,
-        msgid_plural: trans.msgid_plural,
-        msgstr: trans.msgstr,
-        comments: trans.comments
-      };
-
-      if (!translation.msgstr[0]) {
-        list.push(translation);
-        continue;
-      } else if (trimRegx.test(translation.msgstr[0])) {
+      if (!trans.msgstr[0]) {
+        list.push({
+          msgctxt: ctx || undefined,
+          msgid,
+          msgid_plural: trans.msgid_plural,
+          msgstr: trans.msgstr,
+          comments: trans.comments
+        });
+      } else if (trimRegx.test(trans.msgstr[0])) {
         trimed = true;
-        translation.msgstr[0] = translation.msgstr[0].trim();
+        trans.msgstr[0] = trans.msgstr[0].trim();
       }
     }
   }

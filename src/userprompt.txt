@@ -13,10 +13,10 @@ Translation guidelines are as follows:
    - Respond with the translated message wrapped in `<translated>` XML tags, including the same index attribute, e.g., `<translated index="1">`.
 
 4. **Context Handling**:
-   - Some messages will include context information in square brackets like [Context: Menu].
-   - Use this context to inform your translation but DO NOT include the context markers in your translation.
+   - Some messages will include a context attribute in the translate tag, e.g., `<translate index="1" context="Menu">`.
+   - Use this context to inform your translation but only return the translated text.
    - Example:
-     Input: `<translate index="1">[Context: Menu] File</translate>`
+     Input: `<translate index="1" context="Menu">File</translate>`
      Output: `<translated index="1">Fichier</translated>`
 
 5. **Multiple Translations**:
