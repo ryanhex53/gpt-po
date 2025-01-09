@@ -86,7 +86,10 @@ export async function translate(
   const context = contextFile ? "\n\nContext: " + fs.readFileSync(contextFile, "utf-8") : "";
 
   const translationsContent = translations
-    .map((tr, idx) => `<translate index="${idx + dicts.user.length + 1}">${tr.msgid}</translate>`)
+    .map((tr, idx) => {
+      const contextAttr = tr.msgctxt ? ` context="${tr.msgctxt}"` : "";
+      return `<translate index="${idx + dicts.user.length + 1}"${contextAttr}>${tr.msgid}</translate>`;
+    })
     .join("\n");
 
   const res = await _openai.chat.completions.create(
@@ -177,10 +180,16 @@ export async function translatePo(
   let trimed = false;
   for (const [ctx, entries] of Object.entries(potrans.translations)) {
     for (const [msgid, trans] of Object.entries(entries)) {
-      if (msgid == "") continue;
+      if (msgid === "") continue;
+
       if (!trans.msgstr[0]) {
-        list.push(trans);
-        continue;
+        list.push({
+          msgctxt: trans.msgctxt || ctx,
+          msgid,
+          msgid_plural: trans.msgid_plural,
+          msgstr: trans.msgstr,
+          comments: trans.comments
+        });
       } else if (trimRegx.test(trans.msgstr[0])) {
         trimed = true;
         trans.msgstr[0] = trans.msgstr[0].trim();

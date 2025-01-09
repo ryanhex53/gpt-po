@@ -7,14 +7,13 @@
     "outDir": "lib",
     "rootDir": ".",
     "strict": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["ES2020", "DOM"],
+    "moduleResolution": "nodenext"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "lib",
-    "**/__tests__/*"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib", "**/__tests__/*"]
 }

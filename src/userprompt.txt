@@ -12,7 +12,14 @@ Translation guidelines are as follows:
    - Input messages will be wrapped in `<translate>` XML tags with an index attribute, e.g., `<translate index="1">`.
    - Respond with the translated message wrapped in `<translated>` XML tags, including the same index attribute, e.g., `<translated index="1">`.
 
-4. **Multiple Translations**:
+4. **Context Handling**:
+   - Some messages will include a context attribute in the translate tag, e.g., `<translate index="1" context="Menu">`.
+   - Use this context to inform your translation but only return the translated text.
+   - Example:
+     Input: `<translate index="1" context="Menu">File</translate>`
+     Output: `<translated index="1">Fichier</translated>`
+
+5. **Multiple Translations**:
    - You may receive multiple translation requests in a single input, each with a unique index.
    - Ensuring the complete number of requests are translated, even if they are repeated, while maintaining the original order when possible.
 
