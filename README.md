@@ -60,7 +60,7 @@ Options:
   --verbose              show verbose log
   -l, --lang <lang>      target language (ISO 639-1 code)
   -o, --output <file>    output file path, overwirte po file by default
-  --context              context file path (provides additional context to the bot)
+  --context <file>       context file path (provides additional context to the bot)
   -h, --help             display help for command
 ```
 
