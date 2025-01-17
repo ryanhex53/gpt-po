@@ -62,7 +62,7 @@ npm install gpt-po
   --verbose              显示详细日志
   -l, --lang <lang>      目标语言 (ISO 639-1 代码)
   -o, --output <file>    输出文件路径，默认覆盖 po 文件
-  --context              上下文文件路径（为机器人提供额外的上下文）
+  --context <file>       上下文文件路径（为机器人提供额外的上下文）
   -h, --help             显示命令帮助
 ```
 
