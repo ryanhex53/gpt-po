@@ -56,7 +56,8 @@ export async function translate(
   lang: string,
   model: string,
   translations: GetTextTranslation[],
-  contextFile: string
+  contextFile: string,
+  timeout: number = 20000
 ) {
   const lang_code = lang
     .toLowerCase()
@@ -126,7 +127,7 @@ export async function translate(
       ]
     },
     {
-      timeout: 20000,
+      timeout,
       stream: false
     }
   );
@@ -152,6 +153,7 @@ export async function translatePo(
   verbose: boolean,
   output: string,
   contextFile: string,
+  timeout: number = 20000,
   compileOptions?: CompileOptions
 ) {
   const potrans = await parsePo(po);
@@ -219,7 +221,7 @@ export async function translatePo(
     }
     if (c >= 2000 || i == list.length - 1) {
       try {
-        await translate(source, lang, model, translations, contextFile);
+        await translate(source, lang, model, translations, contextFile, timeout);
         if (verbose) {
           translations.forEach((trans) => {
             console.log(trans.msgid);
@@ -261,6 +263,7 @@ export async function translatePoDir(
   lang: string,
   verbose: boolean,
   contextFile: string,
+  timeout: number = 20000,
   compileOptions?: CompileOptions
 ) {
   const files = fs.readdirSync(dir);
@@ -268,7 +271,7 @@ export async function translatePoDir(
     if (file.endsWith(".po")) {
       const po = path.join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, po, contextFile, compileOptions);
+      await translatePo(model, po, source, lang, verbose, po, contextFile, timeout, compileOptions);
     }
   }
 }
