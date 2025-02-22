@@ -62,7 +62,7 @@ const translateCommand = new SharedOptionsCommand("translate")
   .option("-l, --lang <lang>", "target language (ISO 639-1)")
   .option("--verbose", "print verbose log")
   .option("--context <file>", "text file that provides the bot additional context")
-  .option("--timeout <ms>", "timeout in milliseconds for API requests", "20000")
+  .addOption(new Option("--timeout <ms>", "timeout in milliseconds for API requests").env("API_TIMEOUT").default("20000"))
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts("dir")
   )

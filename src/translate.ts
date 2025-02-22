@@ -57,7 +57,7 @@ export async function translate(
   model: string,
   translations: GetTextTranslation[],
   contextFile: string,
-  timeout: number = 20000
+  timeout: number = parseInt(process.env.API_TIMEOUT || "20000")
 ) {
   const lang_code = lang
     .toLowerCase()
