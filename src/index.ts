@@ -62,12 +62,13 @@ const translateCommand = new SharedOptionsCommand("translate")
   .option("-l, --lang <lang>", "target language (ISO 639-1)")
   .option("--verbose", "print verbose log")
   .option("--context <file>", "text file that provides the bot additional context")
+  .addOption(new Option("--timeout <ms>", "timeout in milliseconds for API requests").env("API_TIMEOUT").default("20000"))
   .addOption(
     new Option("-o, --output <file>", "output file path, overwirte po file by default").conflicts("dir")
   )
   .addCompileOptions()
   .action(async (args) => {
-    const { key, host, model, po, dir, source, lang, verbose, output, context } = args;
+    const { key, host, model, po, dir, source, lang, verbose, output, context, timeout } = args;
     if (host) {
       process.env.OPENAI_API_HOST = host;
     }
@@ -82,9 +83,9 @@ const translateCommand = new SharedOptionsCommand("translate")
     init();
     const compileOptions = getCompileOptions(args);
     if (po) {
-      await translatePo(model, po, source, lang, verbose, output, context, compileOptions);
+      await translatePo(model, po, source, lang, verbose, output, context, parseInt(timeout), compileOptions);
     } else if (dir) {
-      await translatePoDir(model, dir, source, lang, verbose, context, compileOptions);
+      await translatePoDir(model, dir, source, lang, verbose, context, parseInt(timeout), compileOptions);
     } else {
       console.error("po file or directory is required");
       process.exit(1);

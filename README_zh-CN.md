@@ -63,6 +63,7 @@ npm install gpt-po
   -l, --lang <lang>      目标语言 (ISO 639-1 代码)
   -o, --output <file>    输出文件路径，默认覆盖 po 文件
   --context <file>       上下文文件路径（为机器人提供额外的上下文）
+  --timeout <ms>         API 请求超时时间（单位：毫秒，默认：20000，环境变量：API_TIMEOUT）
   -h, --help             显示命令帮助
 ```
 
