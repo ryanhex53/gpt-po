@@ -61,6 +61,7 @@ Options:
   -l, --lang <lang>      target language (ISO 639-1 code)
   -o, --output <file>    output file path, overwirte po file by default
   --context <file>       context file path (provides additional context to the bot)
+  --context-length <length>  Maximum accumulated length of source strings (msgid) to translate in each API request (default: 2000, env: API_CONTEXT_LENGTH)
   --timeout <ms>         Timeout in milliseconds for API requests (default: 20000, env: API_TIMEOUT)
   -h, --help             display help for command
 ```
