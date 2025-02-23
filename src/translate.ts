@@ -57,7 +57,7 @@ export async function translate(
   model: string,
   translations: GetTextTranslation[],
   contextFile: string,
-  timeout: number = parseInt(process.env.API_TIMEOUT || "20000")
+  timeout: number
 ) {
   const lang_code = lang
     .toLowerCase()
@@ -153,7 +153,7 @@ export async function translatePo(
   verbose: boolean,
   output: string,
   contextFile: string,
-  timeout: number = 20000,
+  timeout: number,
   compileOptions?: CompileOptions
 ) {
   const potrans = await parsePo(po);
@@ -263,7 +263,7 @@ export async function translatePoDir(
   lang: string,
   verbose: boolean,
   contextFile: string,
-  timeout: number = 20000,
+  timeout: number,
   compileOptions?: CompileOptions
 ) {
   const files = fs.readdirSync(dir);
