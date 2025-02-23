@@ -153,6 +153,7 @@ export async function translatePo(
   verbose: boolean,
   output: string,
   contextFile: string,
+  contextLength: number,
   timeout: number,
   compileOptions?: CompileOptions
 ) {
@@ -215,11 +216,11 @@ export async function translatePo(
       await new Promise((resolve) => setTimeout(resolve, 20000));
     }
     const trans = list[i];
-    if (c < 2000) {
+    if (c < contextLength) {
       translations.push(trans);
       c += trans.msgid.length;
     }
-    if (c >= 2000 || i == list.length - 1) {
+    if (c >= contextLength || i == list.length - 1) {
       try {
         await translate(source, lang, model, translations, contextFile, timeout);
         if (verbose) {
@@ -232,7 +233,7 @@ export async function translatePo(
         c = 0;
         // update progress
         printProgress(i + 1, list.length);
-        // save po file after each 2000 characters
+        // save po file after each 2000 characters by default
         await compilePo(potrans, output || po, compileOptions);
       } catch (error: any) {
         if (error.response) {
@@ -263,6 +264,7 @@ export async function translatePoDir(
   lang: string,
   verbose: boolean,
   contextFile: string,
+  contextLength: number,
   timeout: number,
   compileOptions?: CompileOptions
 ) {
@@ -271,7 +273,7 @@ export async function translatePoDir(
     if (file.endsWith(".po")) {
       const po = path.join(dir, file);
       console.log(`translating ${po}`);
-      await translatePo(model, po, source, lang, verbose, po, contextFile, timeout, compileOptions);
+      await translatePo(model, po, source, lang, verbose, po, contextFile, contextLength, timeout, compileOptions);
     }
   }
 }
