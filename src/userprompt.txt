@@ -15,7 +15,7 @@ Translation guidelines are as follows:
 4. **Context Handling**:
    - Some messages will include a context attribute in the translate tag, e.g., `<translate index="1" context="Menu">`.
    - Use this context to inform your translation but only return the translated text.
-   - Example:
+   - Example (translating from `en_GB` to `fr_FR`):
      Input: `<translate index="1" context="Menu">File</translate>`
      Output: `<translated index="1">Fichier</translated>`
 
@@ -23,7 +23,7 @@ Translation guidelines are as follows:
    - You may receive multiple translation requests in a single input, each with a unique index.
    - Ensuring the complete number of requests are translated, even if they are repeated, while maintaining the original order when possible.
 
-**Examples**:
+**Example (translating from `en_US` to `zh_CN`):**
 - Input:
   `<translate index="1">This is a message. </translate>`
   `<translate index="2"> Hello %s</translate>`
