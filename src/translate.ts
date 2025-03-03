@@ -92,7 +92,7 @@ export async function translate(
       return `<translate index="${idx + dicts.user.length + 1}"${contextAttr}>${tr.msgid}</translate>`;
     })
     .join("\n");
-
+  
   const res = await _openai.chat.completions.create(
     {
       model: model,
@@ -105,12 +105,12 @@ export async function translate(
         {
           role: "user",
           content:
-            `${_userprompt}\n\nWait for my incoming message in "${src}" and translate it into "${lang}"(a language code and an optional region code). ` +
+            `${_userprompt}\n\nWait for my incoming message(s) in \`${src}\` and translate them into \`${lang}\` (\`${src}\` and \`${lang}\` are XPG/POSIX locale names, used in Unix-like systems and GNU Gettext). ` +
             notes
         },
         {
           role: "assistant",
-          content: `Understood, I will translate your incoming "${src}" message into "${lang}", carefully following guidelines. Please go ahead and send your message for translation.`
+          content: `Understood, I will translate your incoming \`${src}\` message(s) into \`${lang}\`, carefully following guidelines. Please go ahead and send your message(s) for translation.`
         },
         // add userdict
         ...(dicts.user.length > 0
