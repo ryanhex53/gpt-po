@@ -92,7 +92,7 @@ export async function translate(
       return `<translate index="${idx + dicts.user.length + 1}"${contextAttr}>${tr.msgid}</translate>`;
     })
     .join("\n");
-  
+
   const res = await _openai.chat.completions.create(
     {
       model: model,
