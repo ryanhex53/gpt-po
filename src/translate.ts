@@ -96,7 +96,7 @@ export async function translate(
   const res = await _openai.chat.completions.create(
     {
       model: model,
-      temperature: 0.1,
+      temperature: process.env.OPENAI_MODEL_TMP ? parseFloat(process.env.OPENAI_MODEL_TMP) : 0.1,
       messages: [
         {
           role: "system",

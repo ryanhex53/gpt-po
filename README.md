@@ -19,6 +19,11 @@ Set `OPENAI_API_KEY` before using this tool.
 
 **It is recommended to use the paid OpenAI API to improve translation speed, as the free OpenAI API is slower (only 3 translations per minute) and has usage restrictions.**
 
+### Environment Variables
+- `OPENAI_API_KEY`: OpenAI API key.
+- `OPENAI_API_HOST`: OpenAI API host (default: https://api.openai.com).
+- `OPENAI_MODEL_TMP`: OpenAI model temperature (default: 0.1).
+
 ## Usage Scenarios
 
 - `gpt-po sync --po <file> --pot <file>` Update the po file based on the pot file, while preserving the original translations.

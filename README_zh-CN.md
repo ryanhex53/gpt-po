@@ -21,6 +21,11 @@ npm install gpt-po
 
 *国内用户要设置`HTTPS_PROXY`环境变量上梯子才能用*
 
+### 环境变量
+- `OPENAI_API_KEY`: OpenAI API密钥。
+- `OPENAI_API_HOST`: OpenAI API主机（默认：https://api.openai.com）。
+- `OPENAI_MODEL_TMP`: OpenAI模型温度（默认：0.1）。
+
 ## 常见用法
 
 - `gpt-po sync --po <file> --pot <file>` 根据 pot 文件更新 po 文件，同时保留原有翻译。
