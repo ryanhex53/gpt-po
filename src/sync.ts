@@ -1,6 +1,7 @@
-import { CompileOptions, compilePo, parsePo } from "./utils.js";
+import { compilePo, parsePo } from "./utils.js";
+import { GetTextPoCompilerOptions } from "gettext-parser";
 
-export async function sync(po: string, pot: string, compileOptions?: CompileOptions) {
+export async function sync(po: string, pot: string, compileOptions?: GetTextPoCompilerOptions) {
   const potrans = await parsePo(po);
   const potrans2 = await parsePo(pot);
 

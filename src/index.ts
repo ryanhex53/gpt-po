@@ -7,8 +7,8 @@ import pkg from "../package.json" with { type: "json" };
 import { removeByOptions } from "./manipulate.js";
 import { sync } from "./sync.js";
 import { init, translatePo, translatePoDir } from "./translate.js";
+import { GetTextPoCompilerOptions } from "gettext-parser";
 import {
-  CompileOptions,
   compilePo,
   copyFileIfNotExists,
   findConfig,
@@ -24,7 +24,7 @@ const program = new Command();
 
 program.name(pkg.name).version(pkg.version).description(pkg.description);
 
-const getCompileOptions = (args: any): CompileOptions => {
+const getCompileOptions = (args: any): GetTextPoCompilerOptions => {
   const foldLength = args.poFoldLen === "false" ? 0 : parseInt(args.poFoldLen);
   const sort = args.poSort;
   const escapeCharacters = args.poEscChars;

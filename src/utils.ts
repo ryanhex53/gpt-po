@@ -1,6 +1,6 @@
 import { exec, spawn } from "child_process";
 import * as fs from "fs";
-import { GetTextTranslations, po } from "gettext-parser";
+import { GetTextTranslations, GetTextPoCompilerOptions, po } from "gettext-parser";
 import { homedir, platform } from "os";
 import * as path from "path";
 
@@ -38,22 +38,16 @@ export function parsePo(poFile: string, defaultCharset?: string): Promise<GetTex
   return new Promise((resolve, reject) => {
     fs.readFile(poFile, (err, buffer) => {
       if (err) reject(err);
-      const result = po.parse(buffer, defaultCharset ?? "utf-8");
+      const result = po.parse(buffer, { defaultCharset: defaultCharset ?? "utf-8" }); 
       resolve(result);
     });
   });
 }
 
-export type CompileOptions = {
-  foldLength?: number;
-  sort?: boolean | ((a: never, b: never) => number);
-  escapeCharacters?: boolean;
-};
-
 export function compilePo(
   data: GetTextTranslations,
   poFile: string,
-  options: CompileOptions = { foldLength: 120, sort: false, escapeCharacters: true }
+  options: GetTextPoCompilerOptions = { foldLength: 120, sort: false, escapeCharacters: true }
 ): Promise<void> {
   const buffer = po.compile(data, options);
   return new Promise((resolve, reject) => {

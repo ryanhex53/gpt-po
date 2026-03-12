@@ -1,12 +1,11 @@
 import * as fs from "fs";
-import { GetTextTranslation } from "gettext-parser";
+import { GetTextTranslation, GetTextPoCompilerOptions } from "gettext-parser";
 import { OpenAI } from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
 import path from "path";
 import { fileURLToPath } from "url";
 import pkg from "../package.json" with { type: "json" };
 import {
-  CompileOptions,
   compilePo,
   copyFileIfNotExists,
   findConfig,
@@ -155,7 +154,7 @@ export async function translatePo(
   contextFile: string,
   contextLength: number,
   timeout: number,
-  compileOptions?: CompileOptions
+  compileOptions?: GetTextPoCompilerOptions
 ) {
   const potrans = await parsePo(po);
 
@@ -266,7 +265,7 @@ export async function translatePoDir(
   contextFile: string,
   contextLength: number,
   timeout: number,
-  compileOptions?: CompileOptions
+  compileOptions?: GetTextPoCompilerOptions
 ) {
   const files = fs.readdirSync(dir);
   for (const file of files) {
