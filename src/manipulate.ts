@@ -30,10 +30,6 @@ export function removeByOptions(
       if (options?.fuzzy && fuzzyRegx.test(entry.comments?.flag || "")) {
         delete potrans.translations[ctx][msgid];
       }
-      // remove obsolete
-      if (options?.obsolete && obsoleteRegx.test(entry.comments?.flag || "")) {
-        delete potrans.translations[ctx][msgid];
-      }
       // remove untranslated
       if (options?.untranslated && msgstr.length === 0) {
         delete potrans.translations[ctx][msgid];
@@ -62,5 +58,9 @@ export function removeByOptions(
       }
     }
   }
+
+  if (options?.obsolete && potrans.obsolete)
+    delete potrans.obsolete;
+
   return potrans;
 }
