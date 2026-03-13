@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "gettext-parser": "^8.0.0",
+    "gettext-parser": "^9.0.1",
     "openai": "^4.56.0"
   },
   "engines": {
