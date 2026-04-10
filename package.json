@@ -11,7 +11,7 @@
     "start": "node lib/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prebuild": "rimraf ./lib",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.json",
     "postbuild": "ncp ./src/ ./lib/src/ \"--filter=^(?!.*\\.ts$).*$\"",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json"
